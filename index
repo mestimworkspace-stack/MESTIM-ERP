@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP OFFICE - Местим Всичко</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
+        .card { border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); background: white; }
+        .btn-primary { background: #2563eb; color: white; padding: 10px 20px; border-radius: 12px; transition: 0.3s; }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-slate-900 text-white p-6">
+            <h1 class="text-xl font-bold mb-10 text-blue-400">MESTIM ERP</h1>
+            <nav class="space-y-4">
+                <a href="#" onclick="showSection('clients')" class="block p-3 hover:bg-slate-800 rounded-lg">👥 Клиенти</a>
+                <a href="#" onclick="showSection('employees')" class="block p-3 hover:bg-slate-800 rounded-lg">👷 Служители</a>
+                <a href="#" onclick="showSection('finances')" class="block p-3 hover:bg-slate-800 rounded-lg">💰 Заплати</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-10">
+            <header class="flex justify-between items-center mb-10">
+                <h2 id="section-title" class="text-3xl font-bold text-slate-800">Клиенти</h2>
+                <button onclick="openModal()" class="btn-primary">+ Добави Нов</button>
+            </header>
+
+            <!-- Data Table -->
+            <div class="card overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b">
+                        <tr id="table-headers">
+                            <!-- Динамични хедъри -->
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Данните ще се заредят тук -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwAKelVaD8tyPQFtIroMFbEwGlxJhaomGWsTKw_JlAjMyhjwQ2oqy5pBnhD_S38UiAL6Q/exec';
+
+        async function loadData(tab) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'GET_DATA', tab: tab })
+            });
+            const result = await response.json();
+            renderTable(result.data);
+        }
+
+        function renderTable(data) {
+            if (data.length === 0) return;
+            const headers = Object.keys(data[0]);
+            document.getElementById('table-headers').innerHTML = headers.map(h => `<th class="p-4 font-semibold text-slate-600">${h}</th>`).join('');
+            
+            document.getElementById('table-body').innerHTML = data.map(row => `
+                <tr class="border-b hover:bg-blue-50 cursor-pointer transition">
+                    ${headers.map(h => `<td class="p-4 text-slate-700">${row[h] || ''}</td>`).join('')}
+                </tr>
+            `).join('');
+        }
+
+        // Първоначално зареждане
+        window.onload = () => loadData('Clients');
+    </script>
+</body>
+</html>
