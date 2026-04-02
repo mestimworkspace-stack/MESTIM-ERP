@@ -7,83 +7,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
         h1, h2 { font-family: 'Montserrat', sans-serif; }
-        .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(8px); }
+        .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(5px); }
         .modal.active { display: flex; }
-        .table-container { background: white; border-radius: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .btn-delete { color: #ef4444; padding: 6px; border-radius: 8px; transition: 0.2s; }
+        .btn-delete:hover { background: #fef2f2; transform: scale(1.1); }
     </style>
 </head>
 <body>
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col">
-            <h1 class="text-white text-2xl font-black mb-12 tracking-tighter italic">MESTIM <span class="text-blue-500 font-normal not-italic">ERP</span></h1>
-            
-            <nav class="space-y-3 flex-1">
-                <button onclick="changeTab('Clients', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl transition-all flex items-center gap-3 font-semibold">👥 Клиенти</button>
-                <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl transition-all flex items-center gap-3 font-semibold">👷 Екип</button>
-                <button onclick="changeTab('Resources', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl transition-all flex items-center gap-3 font-semibold">📚 Ресурси</button>
+        <aside class="w-64 bg-slate-900 text-slate-400 p-6 shrink-0 shadow-2xl">
+            <h1 class="text-white text-xl font-black mb-10 tracking-tighter italic">MESTIM <span class="text-blue-500 font-normal not-italic uppercase text-xs tracking-widest block">ERP Office</span></h1>
+            <nav class="space-y-2">
+                <button onclick="changeTab('Clients', this)" class="sidebar-btn active w-full text-left p-4 rounded-xl transition-all flex items-center gap-3 font-semibold">👥 Клиенти</button>
+                <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-xl transition-all flex items-center gap-3 font-semibold">👷 Екип</button>
+                <button onclick="changeTab('Resources', this)" class="sidebar-btn w-full text-left p-4 rounded-xl transition-all flex items-center gap-3 font-semibold">📚 Ресурси</button>
             </nav>
-
-            <div class="pt-6 border-t border-slate-800 text-xs uppercase tracking-widest font-bold text-slate-600">
-                Office Version 1.2
-            </div>
         </aside>
 
         <!-- Main -->
-        <main class="flex-1 p-12">
-            <header class="flex justify-between items-end mb-12">
+        <main class="flex-1 p-10 overflow-y-auto">
+            <header class="flex justify-between items-center mb-10">
                 <div>
-                    <p id="tab-indicator" class="text-blue-600 font-bold uppercase tracking-widest text-xs mb-2">Управление</p>
-                    <h2 id="section-title" class="text-5xl font-extrabold text-slate-900 tracking-tight">Клиенти</h2>
+                    <h2 id="section-title" class="text-4xl font-extrabold text-slate-800 tracking-tight">Клиенти</h2>
                 </div>
-                <button onclick="openModal()" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
+                <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all">
                     + ДОБАВИ НОВ
                 </button>
             </header>
 
-            <div class="table-container overflow-hidden border border-slate-200">
+            <!-- Table -->
+            <div class="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
                 <table class="w-full text-left border-collapse">
-                    <thead id="table-head" class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                        <tr><th class="p-6">Зареждане на данни...</th></tr>
+                    <thead id="table-head" class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        <!-- Headers -->
                     </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-100">
-                        <!-- Данни -->
+                    <tbody id="table-body" class="divide-y divide-slate-50">
+                        <tr><td class="p-20 text-center animate-pulse text-slate-400 italic">Синхронизиране с Google Sheets...</td></tr>
                     </tbody>
                 </table>
-                <div id="no-data" class="hidden py-32 text-center">
-                    <span class="text-5xl">Empty</span>
-                    <p class="text-slate-400 mt-4 font-medium italic">Все още няма записи в този таб.</p>
-                </div>
+                <div id="no-data" class="hidden py-32 text-center text-slate-300 italic font-medium">Няма намерени записи.</div>
             </div>
         </main>
     </div>
 
     <!-- Modal Form -->
     <div id="entryModal" class="modal">
-        <div class="bg-white rounded-[32px] w-full max-w-md p-10 shadow-2xl overflow-hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h3 id="modal-title" class="text-3xl font-bold text-slate-900 tracking-tighter">Нов запис</h3>
-                <button onclick="closeModal()" class="text-slate-300 hover:text-slate-900 transition">✕</button>
-            </div>
-
+        <div class="bg-white rounded-[40px] w-full max-w-md p-10 shadow-2xl border border-slate-100">
+            <h3 id="modal-title" class="text-2xl font-bold mb-8 text-slate-900 tracking-tighter italic">Нов запис</h3>
             <form id="dataForm" onsubmit="handleSave(event)" class="space-y-5">
-                <div id="form-fields" class="space-y-4 text-sm font-semibold text-slate-600">
-                    <!-- Полета -->
+                <div id="form-fields" class="space-y-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+                    <!-- Fields -->
                 </div>
                 <div class="flex gap-4 pt-6">
-                    <button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition">Отказ</button>
-                    <button type="submit" id="saveBtn" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition">Запази</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-50 rounded-2xl font-bold text-slate-400 hover:bg-slate-100">Отказ</button>
+                    <button type="submit" id="saveBtn" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-50 hover:bg-blue-700 transition-all">Запази</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // ПОСТАВИ ТВОЯ URL ТУК:
+        // ПОСТАВИ ТВОЯ НОВ URL ТУК:
         const API_URL = 'https://script.google.com/macros/s/AKfycbzM7ZG2z84hI8N-ATyjtobInZDz43wnwG2Dv03YClBwEmmdUMrVoKHqMcEDl2Pj8CaXuw/exec'; 
 
         let currentTab = 'Clients';
@@ -95,7 +84,7 @@
             const thead = document.getElementById('table-head');
             const noData = document.getElementById('no-data');
             
-            tbody.innerHTML = '<tr><td class="p-20 text-center animate-pulse text-slate-400 font-medium">Синхронизиране...</td></tr>';
+            tbody.innerHTML = '<tr><td class="p-20 text-center animate-pulse text-slate-400 font-medium">Свързване с базата...</td></tr>';
             noData.classList.add('hidden');
 
             try {
@@ -104,10 +93,23 @@
 
                 if (result.success && result.data && result.data.length > 0) {
                     const keys = Object.keys(result.data[0]);
-                    thead.innerHTML = `<tr>${keys.map(k => `<th class="p-6">${k.replace(/_/g, ' ')}</th>`).join('')}</tr>`;
+                    const idKey = keys[0]; // Приемаме, че първата колона е ID
+
+                    thead.innerHTML = `<tr>
+                        ${keys.map(k => `<th class="p-6">${k.replace(/_/g, ' ')}</th>`).join('')}
+                        <th class="p-6 text-right">Действие</th>
+                    </tr>`;
+
                     tbody.innerHTML = result.data.map(row => `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+                        <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-50">
                             ${keys.map(k => `<td class="p-6 text-sm text-slate-700 font-medium">${row[k] || ''}</td>`).join('')}
+                            <td class="p-6 text-right">
+                                <button onclick="deleteRecord('${row[idKey]}')" class="btn-delete" title="Изтрий">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </td>
                         </tr>
                     `).join('');
                 } else {
@@ -116,7 +118,18 @@
                     noData.classList.remove('hidden');
                 }
             } catch (e) {
-                tbody.innerHTML = '<tr><td class="p-20 text-red-500 text-center font-bold">Грешка при връзка. Провери URL!</td></tr>';
+                tbody.innerHTML = '<tr><td class="p-20 text-red-500 text-center font-bold">ГРЕШКА ПРИ ЗАРЕЖДАНЕ! Проверете Deployment URL.</td></tr>';
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (!confirm(`Сигурни ли сте, че искате да изтриете този запис (ID: ${id})?`)) return;
+            
+            try {
+                const res = await fetch(`${API_URL}?action=DELETE_DATA&tab=${currentTab}&id=${id}`, { method: 'POST' });
+                loadData();
+            } catch (err) {
+                alert('Грешка при изтриване.');
             }
         }
 
@@ -136,17 +149,17 @@
 
             if (currentTab === 'Clients') {
                 fields = `
-                    <label>ИМЕ НА КЛИЕНТ</label><input type="text" name="Name" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
-                    <label>ТЕЛЕФОН</label><input type="text" name="Phone" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
-                    <label>БЕЛЕЖКИ</label><input type="text" name="Notes" class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
+                    <label>ИМЕ НА КЛИЕНТ</label><input type="text" name="Name" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
+                    <label>ТЕЛЕФОН</label><input type="text" name="Phone" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
+                    <label>АДРЕС</label><input type="text" name="Address_Main" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
                 `;
             } else if (currentTab === 'Employees') {
                 fields = `
-                    <label>ИМЕ</label><input type="text" name="Name" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
-                    <label>ИМЕЙЛ</label><input type="email" name="Email" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
-                    <label>ПАРОЛА</label><input type="text" name="Password" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
+                    <label>ИМЕ</label><input type="text" name="Name" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
+                    <label>ИМЕЙЛ</label><input type="email" name="Email" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
+                    <label>ПАРОЛА</label><input type="text" name="Password" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
                     <label>РОЛЯ</label>
-                    <select name="Role" class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
+                    <select name="Role" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-none">
                         <option value="Employee">Employee</option>
                         <option value="Manager">Manager</option>
                         <option value="Admin">Admin</option>
@@ -154,13 +167,12 @@
                 `;
             } else if (currentTab === 'Resources') {
                 fields = `
-                    <label>ЗАГЛАВИЕ</label><input type="text" name="Title" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
-                    <label>ЛИНК (Google Drive/Doc)</label><input type="text" name="Link" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
-                    <label>БЕЛЕЖКИ</label><input type="text" name="Notes" class="w-full p-4 bg-slate-50 rounded-xl outline-none border-2 border-transparent focus:border-blue-500">
+                    <label>ЗАГЛАВИЕ</label><input type="text" name="Title" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
+                    <label>ЛИНК</label><input type="text" name="Link" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none">
                 `;
             }
             container.innerHTML = fields;
-            document.getElementById('modal-title').innerText = "Добави " + currentTab;
+            document.getElementById('modal-title').innerText = "Нов " + currentTab;
             document.getElementById('entryModal').classList.add('active');
         }
 
@@ -175,12 +187,11 @@
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
-            // Генериране на ID според таба
+            // Първата колона в Sheets е ID - ТУК ГЕНЕРИРАМЕ ID СПРЯМО ТАБА
             const idMap = { 'Clients': 'ID_Client', 'Employees': 'ID_Emp', 'Resources': 'ID_Resource' };
             data[idMap[currentTab]] = 'ID-' + Math.floor(Math.random() * 9000);
 
             try {
-                // Използваме fetch без хедъри за максимална съвместимост
                 await fetch(API_URL, {
                     method: 'POST',
                     mode: 'no-cors', 
@@ -192,7 +203,7 @@
                     loadData();
                     btn.disabled = false;
                     btn.innerText = 'Запази';
-                }, 1000);
+                }, 1200);
             } catch (err) {
                 alert('Грешка при запис!');
                 btn.disabled = false;
