@@ -7,14 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
         h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
-        .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
+        .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
         .modal.active { display: flex; }
-        .card { border-radius: 32px; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px border-slate-100; }
-        .loader-ring { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .action-btn { transition: all 0.2s; cursor: pointer; }
+        .action-btn:hover { transform: scale(1.2); }
     </style>
 </head>
 <body>
@@ -22,41 +21,34 @@
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-6 bg-slate-900">
         <div class="bg-white p-12 rounded-[40px] w-full max-w-md shadow-2xl">
-            <h1 class="text-3xl font-black text-slate-900 mb-2 italic uppercase">Mestim <span class="text-blue-600 font-normal">ERP</span></h1>
-            <p class="text-slate-400 mb-8 font-semibold uppercase text-[10px] tracking-widest">Система за управление</p>
+            <h1 class="text-3xl font-black text-slate-900 mb-6 italic italic tracking-tighter">MESTIM <span class="text-blue-600 font-normal">ERP</span></h1>
             <form onsubmit="handleLogin(event)" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Имейл" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="password" id="login-pass" placeholder="Парола" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
-                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg">ВХОД</button>
+                <input type="email" id="email" placeholder="Имейл" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
+                <input type="password" id="pass" placeholder="Парола" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
+                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-slate-800 transition-all">ВХОД В СИСТЕМАТА</button>
             </form>
-            <p id="login-error" class="text-red-500 text-sm mt-4 hidden text-center font-bold"></p>
         </div>
     </div>
 
-    <!-- APP SCREEN -->
+    <!-- MAIN APP SCREEN -->
     <div id="app-screen" class="hidden min-h-screen flex">
         <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col shadow-2xl">
-            <h1 class="text-white text-xl font-black mb-12 italic">MESTIM <span class="text-blue-500">ERP</span></h1>
+            <h1 class="text-white text-xl font-black mb-12 italic tracking-tighter">MESTIM <span class="text-blue-500">OFFICE</span></h1>
             <nav class="space-y-3 flex-1">
-                <button onclick="changeTab('Orders', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl transition-all flex items-center gap-3 font-bold">📦 Поръчки</button>
-                <button onclick="changeTab('Clients', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl transition-all flex items-center gap-3 font-bold">👥 Клиенти</button>
-                <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl transition-all flex items-center gap-3 font-bold">👷 Екип</button>
+                <button onclick="changeTab('Orders', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold">📦 Поръчки</button>
+                <button onclick="changeTab('Clients', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold">👥 Клиенти</button>
+                <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold">👷 Екип</button>
             </nav>
-            <button onclick="logout()" class="text-xs font-bold text-red-400 hover:text-white uppercase tracking-widest">Изход</button>
+            <button onclick="logout()" class="text-xs font-bold text-red-400 hover:text-white uppercase tracking-widest pt-6 border-t border-slate-800">Изход</button>
         </aside>
 
         <main class="flex-1 p-12 overflow-y-auto">
             <header class="flex justify-between items-center mb-12">
-                <h2 id="section-title" class="text-5xl font-extrabold text-slate-900 tracking-tighter">Поръчки</h2>
-                <div class="flex items-center gap-4">
-                    <div id="sync-loader" class="loader-ring"></div>
-                    <button onclick="openModal()" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-600 shadow-xl transition-all">
-                        + ДОБАВИ НОВ
-                    </button>
-                </div>
+                <h2 id="section-title" class="text-5xl font-extrabold text-slate-900 tracking-tighter italic">Поръчки</h2>
+                <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">+ ДОБАВИ НОВ</button>
             </header>
 
-            <div class="card overflow-hidden">
+            <div class="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
                 <table class="w-full text-left border-collapse">
                     <thead id="table-head" class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         <!-- Headers -->
@@ -71,14 +63,13 @@
 
     <!-- MODAL -->
     <div id="entryModal" class="modal">
-        <div class="bg-white rounded-[40px] w-full max-w-lg p-10 shadow-2xl">
+        <div class="bg-white rounded-[40px] w-full max-w-lg p-10 shadow-2xl overflow-hidden">
             <h3 id="modal-title" class="text-2xl font-bold mb-8 text-slate-900">Запис</h3>
-            <form id="dataForm" onsubmit="handleSave(event)" class="space-y-4">
-                <input type="hidden" name="ID" id="form-id">
+            <form id="dataForm" onsubmit="handleSave(event)" class="space-y-4 max-h-[60vh] overflow-y-auto px-2">
                 <div id="form-fields" class="space-y-4">
-                    <!-- Fields -->
+                    <!-- Fields will be generated here -->
                 </div>
-                <div class="flex gap-4 pt-6">
+                <div class="flex gap-4 pt-8">
                     <button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold">Отказ</button>
                     <button type="submit" id="saveBtn" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold">ЗАПАЗИ</button>
                 </div>
@@ -87,57 +78,101 @@
     </div>
 
     <script>
+        // ПОСТАВИ ТВОЯ URL ТУК
         const API_URL = 'https://script.google.com/macros/s/AKfycbzM7ZG2z84hI8N-ATyjtobInZDz43wnwG2Dv03YClBwEmmdUMrVoKHqMcEDl2Pj8CaXuw/exec';
+        
         let currentTab = 'Orders';
-        let cachedData = [];
+        let fullData = [];
 
         // --- AUTH ---
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('login-btn');
-            btn.innerText = "ПРОВЕРКА...";
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'LOGIN', email: document.getElementById('login-email').value, password: document.getElementById('login-pass').value })
-            });
-            const result = await res.json();
-            if (result.success) { localStorage.setItem('user', JSON.stringify(result.user)); location.reload(); }
-            else { alert(result.error); btn.innerText = "ВХОД"; }
+            btn.innerText = "ПРОВЕРЯВАМ...";
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'LOGIN', email: document.getElementById('email').value, password: document.getElementById('pass').value })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    localStorage.setItem('mestim_user', JSON.stringify(result.user));
+                    checkAuth();
+                } else { alert("Грешен имейл или парола!"); btn.innerText = "ВХОД В СИСТЕМАТА"; }
+            } catch (err) { alert("Грешка при връзка!"); btn.innerText = "ВХОД В СИСТЕМАТА"; }
         }
 
-        function logout() { localStorage.removeItem('user'); location.reload(); }
+        function checkAuth() {
+            const user = localStorage.getItem('mestim_user');
+            if (user) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                loadData();
+            }
+        }
+
+        function logout() { localStorage.removeItem('mestim_user'); location.reload(); }
 
         // --- DATA ---
         async function loadData() {
-            document.getElementById('sync-loader').style.display = 'block';
             const tbody = document.getElementById('table-body');
             const thead = document.getElementById('table-head');
+            tbody.innerHTML = '<tr><td class="p-20 text-center animate-pulse text-slate-400 font-medium">Синхронизиране...</td></tr>';
 
             try {
                 const response = await fetch(`${API_URL}?action=GET_DATA&tab=${currentTab}`);
                 const result = await response.json();
-                cachedData = result.data;
+                fullData = result.data;
 
-                if (result.success && cachedData.length > 0) {
-                    const keys = Object.keys(cachedData[0]);
-                    thead.innerHTML = `<tr>${keys.map(k => `<th class="p-6">${k}</th>`).join('')}<th class="p-6 text-right">Действия</th></tr>`;
-                    tbody.innerHTML = cachedData.map((row, idx) => `
+                if (result.success && fullData.length > 0) {
+                    const keys = Object.keys(fullData[0]);
+                    thead.innerHTML = `<tr>${keys.map(k => `<th class="p-6">${k}</th>`).join('')}<th class="p-6 text-right">Действие</th></tr>`;
+                    tbody.innerHTML = fullData.map((row, idx) => `
                         <tr class="hover:bg-slate-50 transition-colors">
-                            ${keys.map(k => `<td class="p-6 text-sm text-slate-700 font-medium">${row[k] || ''}</td>`).join('')}
-                            <td class="p-6 text-right flex justify-end gap-3">
-                                <button onclick="editRow(${idx})" class="text-blue-500 hover:scale-110 transition">✎</button>
-                                <button onclick="deleteRow('${row[keys[0]]}')" class="text-red-400 hover:scale-110 transition">✕</button>
+                            ${keys.map(k => `<td class="p-6 text-sm text-slate-600 font-medium">${row[k] || ''}</td>`).join('')}
+                            <td class="p-6 text-right text-lg space-x-4">
+                                <button onclick="openModal(${idx})" class="action-btn text-blue-500">✎</button>
+                                <button onclick="deleteRow('${row[keys[0]]}')" class="action-btn text-red-400">✕</button>
                             </td>
                         </tr>
                     `).join('');
-                } else { tbody.innerHTML = '<tr><td class="p-10 text-center">Няма данни.</td></tr>'; }
-            } finally { document.getElementById('sync-loader').style.display = 'none'; }
+                } else {
+                    tbody.innerHTML = '<tr><td class="p-20 text-center text-slate-300">Няма намерени записи.</td></tr>';
+                }
+            } catch (e) { tbody.innerHTML = '<tr><td class="p-20 text-center text-red-500">Грешка при зареждане.</td></tr>'; }
         }
 
-        function editRow(idx) {
-            const data = cachedData[idx];
-            openModal(data);
+        function openModal(index = null) {
+            const container = document.getElementById('form-fields');
+            const editData = index !== null ? fullData[index] : null;
+            let fields = '';
+
+            // Дефиниране на полета според таба
+            const fieldsMap = {
+                'Orders': ['ID_Order', 'ClientName', 'Service', 'Date', 'TimeStart', 'AddrStart', 'Description'],
+                'Clients': ['ID_Client', 'Name', 'Phone', 'Address_Main'],
+                'Employees': ['ID_Emp', 'Name', 'Email', 'Password', 'Role']
+            };
+
+            const activeFields = fieldsMap[currentTab];
+            
+            fields = activeFields.map(f => {
+                if (f.includes('ID')) {
+                    return `<input type="hidden" name="${f}" value="${editData ? editData[f] : ''}">`;
+                }
+                if (f === 'Date') return `<label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">${f}</label><input type="date" name="${f}" value="${editData ? editData[f] : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">`;
+                if (f === 'Role') return `<select name="Role" class="w-full p-4 bg-slate-50 rounded-2xl outline-none"><option value="Employee" ${editData?.Role === 'Employee' ? 'selected' : ''}>Employee</option><option value="Manager" ${editData?.Role === 'Manager' ? 'selected' : ''}>Manager</option><option value="Admin" ${editData?.Role === 'Admin' ? 'selected' : ''}>Admin</option></select>`;
+                
+                return `<input type="text" name="${f}" placeholder="${f.replace('_', ' ')}" value="${editData ? editData[f] : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">`;
+            }).join('');
+
+            container.innerHTML = fields;
+            document.getElementById('modal-title').innerText = editData ? "Редактирай" : "Добави Нов";
+            document.getElementById('entryModal').classList.add('active');
         }
+
+        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
 
         async function handleSave(e) {
             e.preventDefault();
@@ -147,8 +182,8 @@
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
-            // Ако няма ID, генерираме ново
-            const idKey = Object.keys(cachedData[0] || { 'ID': '' })[0];
+            // Ако е нов запис и няма ID
+            const idKey = Object.keys(data).find(k => k.includes('ID'));
             if (!data[idKey]) data[idKey] = "ID-" + Math.floor(Math.random() * 900000);
 
             await fetch(API_URL, {
@@ -161,9 +196,9 @@
         }
 
         async function deleteRow(id) {
-            if (!confirm("Изтриване?")) return;
+            if (!confirm("Сигурни ли сте?")) return;
             await fetch(`${API_URL}?action=DELETE_DATA&tab=${currentTab}&id=${id}`, { method: 'POST' });
-            loadData();
+            setTimeout(loadData, 1000);
         }
 
         function changeTab(tab, btn) {
@@ -174,47 +209,7 @@
             loadData();
         }
 
-        function openModal(editData = null) {
-            const container = document.getElementById('form-fields');
-            let fields = '';
-
-            if (currentTab === 'Orders') {
-                fields = `
-                    <input type="hidden" name="ID_Order" value="${editData ? editData.ID_Order : ''}">
-                    <input type="text" name="ClientName" placeholder="Клиент" value="${editData ? editData.ClientName : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <input type="text" name="Service" placeholder="Услуга" value="${editData ? editData.Service : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <input type="date" name="Date" value="${editData ? editData.Date : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <input type="text" name="AddrStart" placeholder="От адрес" value="${editData ? editData.AddrStart : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                `;
-            } else if (currentTab === 'Clients') {
-                fields = `
-                    <input type="hidden" name="ID_Client" value="${editData ? editData.ID_Client : ''}">
-                    <input type="text" name="Name" placeholder="Име" value="${editData ? editData.Name : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <input type="text" name="Phone" placeholder="Телефон" value="${editData ? editData.Phone : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                `;
-            } else if (currentTab === 'Employees') {
-                fields = `
-                    <input type="hidden" name="ID_Emp" value="${editData ? editData.ID_Emp : ''}">
-                    <input type="text" name="Name" placeholder="Име" value="${editData ? editData.Name : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <input type="email" name="Email" placeholder="Имейл" value="${editData ? editData.Email : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <input type="text" name="Password" placeholder="Парола" value="${editData ? editData.Password : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                `;
-            }
-
-            container.innerHTML = fields;
-            document.getElementById('entryModal').classList.add('active');
-        }
-
-        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-
-        window.onload = () => {
-            const user = localStorage.getItem('user');
-            if (user) { 
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                loadData();
-            }
-        };
+        window.onload = checkAuth;
     </script>
 </body>
 </html>
