@@ -36,11 +36,16 @@
     <div id="app-screen" class="hidden min-h-screen flex">
         <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col shadow-2xl">
             <h1 class="text-white text-xl font-black mb-12 italic tracking-tighter uppercase">Mestim <span class="text-blue-500">Office</span></h1>
-            <nav class="space-y-3 flex-1">
-                <button onclick="changeTab('Clients', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👥 Клиенти</button>
-                <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👷 Екип</button>
-                <button onclick="changeTab('Resources', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">📚 Ресурси</button>
-            </nav>
+           <nav class="space-y-3 flex-1">
+    <button onclick="changeTab('Clients', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👥 Клиенти</button>
+    <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👷 Екип</button>
+    <button onclick="changeTab('Resources', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">📚 Ресурси</button>
+    
+    <!-- НОВ БУТОН КЪМ ОПЕРАЦИИ -->
+    <a href="operations.html" class="block w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold text-slate-400 hover:bg-slate-800 transition-all">
+        🗓️ График (Operations)
+    </a>
+</nav>
             <button onclick="logout()" class="text-xs font-bold text-red-400 hover:text-white uppercase tracking-widest pt-6 border-t border-slate-800">Изход</button>
         </aside>
 
