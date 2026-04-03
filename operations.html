@@ -7,217 +7,222 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
         h1, h2 { font-family: 'Montserrat', sans-serif; }
-        .calendar-grid { display: grid; grid-template-columns: 80px 1fr; position: relative; background: white; border-radius: 24px; overflow: hidden; border: 1px solid #e2e8f0; }
-        .time-slot { height: 80px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; font-weight: 600; }
-        .order-block { position: absolute; left: 90px; right: 20px; border-radius: 16px; padding: 12px; color: white; font-size: 13px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; overflow: hidden; z-index: 10; }
-        .order-block:hover { transform: scale(1.01); filter: brightness(1.1); }
-        
-        /* Цветове по услуги */
-        .bg-move { background: #3b82f6; border-left: 6px solid #1d4ed8; } /* Преместване */
-        .bg-junk { background: #ef4444; border-left: 6px solid #b91c1c; } /* Изхвърляне */
-        .bg-team { background: #10b981; border-left: 6px solid #047857; } /* Работа на екип */
-        .bg-other { background: #f59e0b; border-left: 6px solid #d97706; } /* Друго */
+        .calendar-grid { display: grid; grid-template-columns: 80px 1fr; background: white; border-radius: 32px; overflow: hidden; border: 1px solid #e2e8f0; position: relative; }
+        .time-slot { height: 100px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #94a3b8; font-weight: 700; }
+        .order-block { position: absolute; left: 90px; right: 20px; border-radius: 20px; padding: 15px; color: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; z-index: 10; border-left: 8px solid rgba(0,0,0,0.2); }
+        .order-block:hover { transform: translateX(5px); }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+        /* Цветове по Услуги */
+        .svc-move { background: #3b82f6; } /* Преместване */
+        .svc-team { background: #10b981; } /* Работа на екип */
+        .svc-junk-const { background: #f59e0b; } /* Изхвърляне строителни */
+        .svc-junk-furn { background: #ef4444; } /* Изхвърляне мебели */
+        .svc-transport { background: #8b5cf6; } /* Транспорт */
+        .svc-check { background: #06b6d4; } /* Оглед */
+        .svc-install { background: #ec4899; } /* Монтаж */
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
         .modal.active { display: flex; }
-        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
+        #loader { display: none; position: fixed; inset: 0; background: white; z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-blue-600 font-bold text-xs uppercase tracking-widest animate-pulse">Зареждане на график...</p>
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-blue-600 font-bold uppercase tracking-widest text-xs">Зареждане на данни...</p>
     </div>
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col shadow-2xl">
-            <h1 class="text-white text-xl font-black mb-10 italic tracking-tighter uppercase">Mestim <span class="text-blue-500">Ops</span></h1>
+        <aside class="w-80 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col shadow-2xl">
+            <h1 class="text-white text-2xl font-black mb-10 italic tracking-tighter uppercase">Mestim <span class="text-blue-500">Ops</span></h1>
             
-            <div class="space-y-6">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Избери дата</label>
-                    <input type="date" id="date-picker" onchange="loadDay()" class="w-full bg-slate-800 text-white p-4 rounded-2xl outline-none border border-slate-700 focus:border-blue-500">
-                </div>
+            <div class="space-y-6 flex-1">
+                <input type="date" id="date-picker" onchange="loadData()" class="w-full bg-slate-800 text-white p-5 rounded-2xl outline-none border border-slate-700 focus:border-blue-500 font-bold">
                 
-                <div class="p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50">
-                    <p class="text-white font-bold text-sm mb-2">Легенда:</p>
-                    <div class="flex items-center gap-2 text-xs mb-2"><span class="w-3 h-3 bg-blue-500 rounded-full"></span> Преместване</div>
-                    <div class="flex items-center gap-2 text-xs mb-2"><span class="w-3 h-3 bg-red-500 rounded-full"></span> Изхвърляне</div>
-                    <div class="flex items-center gap-2 text-xs mb-2"><span class="w-3 h-3 bg-green-500 rounded-full"></span> Екип/Монтаж</div>
+                <div class="space-y-2">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Изглед</p>
+                    <button onclick="setView('day')" class="w-full text-left p-4 rounded-xl bg-blue-600 text-white font-bold">☀️ Дневен</button>
+                    <button onclick="alert('Седмичен изглед се разработва...')" class="w-full text-left p-4 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold">📅 Седмичен</button>
                 </div>
             </div>
 
-            <div class="mt-auto">
-                <button onclick="location.href='index.html'" class="w-full p-4 rounded-xl bg-slate-800 text-xs font-bold hover:bg-slate-700 transition">КЪМ OFFICE APP</button>
-            </div>
+            <button onclick="location.href='index.html'" class="w-full p-5 rounded-2xl bg-slate-800 text-white font-bold text-xs uppercase hover:bg-red-500 transition-all tracking-widest">Към Администрация</button>
         </aside>
 
         <!-- Main -->
-        <main class="flex-1 p-10 overflow-y-auto">
-            <header class="flex justify-between items-center mb-8">
-                <h2 id="current-date-display" class="text-4xl font-extrabold text-slate-900 tracking-tighter italic">Дневен График</h2>
-                <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">+ НОВА ПОРЪЧКА</button>
+        <main class="flex-1 p-12 overflow-y-auto">
+            <header class="flex justify-between items-center mb-10">
+                <h2 id="date-display" class="text-5xl font-extrabold text-slate-900 tracking-tighter italic">График</h2>
+                <button onclick="openModal()" class="bg-blue-600 text-white px-10 py-5 rounded-[24px] font-bold hover:bg-blue-700 shadow-2xl transition-all shadow-blue-200">+ НОВА ПОРЪЧКА</button>
             </header>
 
-            <!-- Calendar Container -->
             <div class="calendar-grid">
-                <!-- Time Column -->
-                <div id="time-column" class="bg-slate-50 border-r border-slate-200">
-                    <!-- Скриптът ще генерира часовете тук -->
-                </div>
-                <!-- Events Column -->
-                <div id="events-container" class="relative">
-                    <!-- Поръчките ще се рендват тук -->
-                </div>
+                <div id="time-column" class="bg-slate-50 border-r border-slate-200"></div>
+                <div id="events-container" class="relative min-h-[1200px]"></div>
             </div>
         </main>
     </div>
 
-    <!-- MODAL FOR ORDER -->
+    <!-- ORDER MODAL -->
     <div id="orderModal" class="modal">
-        <div class="bg-white rounded-[40px] w-full max-w-lg p-10 shadow-2xl">
-            <h3 id="modal-title" class="text-2xl font-bold mb-6 text-slate-900">Детайли на поръчка</h3>
-            <form id="orderForm" onsubmit="handleSave(event)" class="space-y-4 max-h-[60vh] overflow-y-auto px-2">
+        <div class="bg-white rounded-[40px] w-full max-w-3xl p-10 shadow-2xl flex gap-8">
+            <!-- Form Side -->
+            <form id="orderForm" onsubmit="handleSave(event)" class="flex-1 space-y-4">
                 <input type="hidden" name="ID_Order" id="form-id">
+                <h3 class="text-3xl font-black text-slate-900 mb-6 italic tracking-tighter">Детайли</h3>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Клиент</label>
-                        <input type="text" name="ClientName" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
+                        <input list="client-list" name="ClientName" id="client-input" oninput="autoFillClient()" placeholder="Клиент (започни да пишеш...)" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
+                        <datalist id="client-list"></datalist>
                     </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Услуга</label>
-                        <select name="Service" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-                            <option value="Преместване">Преместване</option>
-                            <option value="Изхвърляне">Изхвърляне</option>
-                            <option value="Работа на екип">Работа на екип</option>
-                            <option value="Транспорт">Транспорт</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Дата</label>
-                        <input type="date" name="Date" required id="form-date" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Начало</label>
-                        <input type="time" name="TimeStart" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Край (прогнозно)</label>
-                        <input type="time" name="TimeEnd" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    </div>
+                    <input type="text" name="Phone" id="client-phone" placeholder="Телефон" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
+                    <select name="Service" id="svc-select" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500 font-bold">
+                        <option value="Преместване">Преместване</option>
+                        <option value="Работа на екип">Работа на екип</option>
+                        <option value="Изхвърляне строителни">Изхвърляне строителни</option>
+                        <option value="Изхвърляне мебели">Изхвърляне мебели</option>
+                        <option value="Транспорт">Транспорт</option>
+                        <option value="Оглед">Оглед</option>
+                        <option value="Монтаж">Монтаж</option>
+                    </select>
+                    <input type="date" name="Date" id="order-date" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
+                    <input type="time" name="TimeStart" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
+                    <input type="time" name="TimeEnd" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
+                    <input type="text" name="AddrStart" placeholder="От адрес (Линк към Maps автоматично)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
+                    <input type="text" name="AddrEnd" placeholder="До адрес" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
                 </div>
-                
-                <input type="text" name="AddrStart" placeholder="От адрес" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                <textarea name="Description" placeholder="Допълнителни бележки..." class="w-full p-4 bg-slate-50 rounded-2xl outline-none h-24"></textarea>
 
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button>
-                    <button type="submit" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-lg shadow-blue-100">Запази</button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 p-5 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button>
+                    <button type="submit" class="flex-1 p-5 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-xl">Запази</button>
                 </div>
-                <button type="button" id="delete-btn" onclick="handleDelete()" class="w-full text-red-400 text-xs font-bold uppercase mt-4 hidden">Изтрий поръчката</button>
+                <button type="button" id="del-btn" onclick="deleteOrder()" class="w-full text-red-400 text-[10px] font-bold uppercase hidden">Изтрий поръчката</button>
             </form>
+
+            <!-- Assignments Side -->
+            <div class="w-64 border-l pl-8">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Назначи Екип</p>
+                <div id="employees-list" class="space-y-2 overflow-y-auto max-h-[400px] pr-2">
+                    <!-- Служителите ще се заредят тук -->
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwzopLoI-LciRUQdBSJ9B5Qfsh8CPuaKK8UnVv38ctIMJTQhsS5_pP-14-_27ADxeAPMQ/exec';
-        const startHour = 8;
-        const endHour = 20;
-        let orders = [];
+        const API_URL = 'https://script.google.com/macros/s/AKfycbysYUPyk-rdT3dpCgowWmvqiOOiU1qS3S2qMsKsg1-sLgxbzUtKRwqhAUAg-cLuSSN4yw/exec';
+        let clients = [], employees = [], orders = [];
 
         window.onload = () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date-picker').value = today;
-            document.getElementById('form-date').value = today;
-            generateTimeGrid();
-            loadDay();
+            document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
+            generateGrid();
+            loadInitialData();
         };
 
-        function generateTimeGrid() {
-            const timeCol = document.getElementById('time-column');
-            const eventsCol = document.getElementById('events-container');
-            timeCol.innerHTML = '';
-            for (let i = startHour; i <= endHour; i++) {
-                timeCol.innerHTML += `<div class="time-slot">${i}:00</div>`;
-            }
+        function generateGrid() {
+            const col = document.getElementById('time-column');
+            for(let i=8; i<=20; i++) col.innerHTML += `<div class="time-slot">${i}:00</div>`;
         }
 
-        async function loadDay() {
+        async function loadInitialData() {
             toggleLoader(true);
-            const selectedDate = document.getElementById('date-picker').value;
-            document.getElementById('current-date-display').innerText = new Date(selectedDate).toLocaleDateString('bg-BG', { weekday: 'long', day: 'numeric', month: 'long' });
-            
             try {
-                const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`);
-                const result = await res.json();
-                orders = result.data || [];
-                renderOrders(selectedDate);
-            } catch (e) { alert("Грешка при зареждане!"); }
-            finally { toggleLoader(false); }
+                // Дърпаме всичко наведнъж за бързина
+                const [cRes, eRes, oRes] = await Promise.all([
+                    fetch(`${API_URL}?action=GET_DATA&tab=Clients`).then(r => r.json()),
+                    fetch(`${API_URL}?action=GET_DATA&tab=Employees`).then(r => r.json()),
+                    fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r => r.json())
+                ]);
+                clients = cRes.data || [];
+                employees = eRes.data || [];
+                orders = oRes.data || [];
+
+                // Попълваме списъка за Autocomplete
+                document.getElementById('client-list').innerHTML = clients.map(c => `<option value="${c.Name}">`).join('');
+                // Попълваме списъка със служители в модала
+                document.getElementById('employees-list').innerHTML = employees.map(e => `
+                    <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-blue-50 transition">
+                        <input type="checkbox" name="emp" value="${e.ID_Emp}" class="w-5 h-5 rounded-lg text-blue-600 focus:ring-0">
+                        <span class="text-sm font-bold text-slate-700">${e.Name}</span>
+                    </label>
+                `).join('');
+
+                renderCalendar();
+            } finally { toggleLoader(false); }
         }
 
-        function renderOrders(date) {
+        function autoFillClient() {
+            const name = document.getElementById('client-input').value;
+            const client = clients.find(c => c.Name === name);
+            if(client) document.getElementById('client-phone').value = client.Phone;
+        }
+
+        function renderCalendar() {
             const container = document.getElementById('events-container');
+            const selectedDate = document.getElementById('date-picker').value;
             container.innerHTML = '';
-            
-            const filtered = orders.filter(o => o.Date.includes(date));
+            document.getElementById('date-display').innerText = new Date(selectedDate).toLocaleDateString('bg-BG', { weekday: 'long', day: 'numeric', month: 'long' });
 
-            filtered.forEach(order => {
-                const start = timeToMinutes(order.TimeStart);
-                const end = timeToMinutes(order.TimeEnd);
-                const top = ((start / 60) - startHour) * 80;
-                const height = ((end - start) / 60) * 80;
+            const todayOrders = orders.filter(o => o.Date.includes(selectedDate));
+            const svcColors = {
+                'Преместване': 'svc-move', 'Работа на екип': 'svc-team',
+                'Изхвърляне строителни': 'svc-junk-const', 'Изхвърляне мебели': 'svc-junk-furn',
+                'Транспорт': 'svc-transport', 'Оглед': 'svc-check', 'Монтаж': 'svc-install'
+            };
 
-                let colorClass = 'bg-other';
-                if (order.Service.includes('Преместване')) colorClass = 'bg-move';
-                if (order.Service.includes('Изхвърляне')) colorClass = 'bg-junk';
-                if (order.Service.includes('Работа')) colorClass = 'bg-team';
-
+            todayOrders.forEach(o => {
+                const start = parseTime(o.TimeStart), end = parseTime(o.TimeEnd);
+                const top = (start - 8) * 100, height = (end - start) * 100;
+                
                 const div = document.createElement('div');
-                div.className = `order-block ${colorClass}`;
-                div.style.top = `${top}px`;
-                div.style.height = `${height}px`;
+                div.className = `order-block ${svcColors[o.Service] || 'bg-slate-500'}`;
+                div.style.top = top + 'px';
+                div.style.height = height + 'px';
+                
                 div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <span class="block font-black uppercase text-[10px] opacity-80">${order.TimeStart} - ${order.TimeEnd}</span>
-                        <span class="text-[10px]">#${order.ID_Order.slice(-4)}</span>
+                    <div class="flex justify-between opacity-70 text-[10px] font-black uppercase mb-1">
+                        <span>${o.TimeStart} - ${o.TimeEnd}</span>
+                        <span>#${o.ID_Order.slice(-4)}</span>
                     </div>
-                    <div class="mt-1 font-bold text-sm truncate">${order.ClientName}</div>
-                    <div class="text-[10px] opacity-90 truncate">${order.AddrStart || 'Няма адрес'}</div>
+                    <div class="font-black text-sm truncate uppercase tracking-tighter">${o.ClientName}</div>
+                    <div class="flex gap-4 mt-3">
+                        <a href="tel:${o.Phone}" onclick="event.stopPropagation()" class="bg-white/20 p-2 rounded-lg hover:bg-white/40">📞</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.AddrStart)}" target="_blank" onclick="event.stopPropagation()" class="bg-white/20 p-2 rounded-lg hover:bg-white/40">📍</a>
+                    </div>
                 `;
-                div.onclick = () => openModal(order);
+                div.onclick = () => openModal(o);
                 container.appendChild(div);
             });
         }
 
-        function timeToMinutes(time) {
-            if (!time) return 0;
-            const [h, m] = time.split(':').map(Number);
-            return h * 60 + m;
+        function parseTime(t) {
+            const [h, m] = t.split(':').map(Number);
+            return h + (m/60);
         }
 
         function openModal(data = null) {
             const form = document.getElementById('orderForm');
-            const delBtn = document.getElementById('delete-btn');
             form.reset();
+            document.querySelectorAll('input[name="emp"]').forEach(cb => cb.checked = false);
             
-            if (data) {
+            if(data) {
                 document.getElementById('form-id').value = data.ID_Order;
-                document.getElementById('modal-title').innerText = "Редакция на поръчка";
-                delBtn.classList.remove('hidden');
-                // Populating form...
-                Object.keys(data).forEach(key => {
-                    if (form.elements[key]) form.elements[key].value = data[key];
-                });
+                document.getElementById('del-btn').classList.remove('hidden');
+                Object.keys(data).forEach(k => { if(form.elements[k]) form.elements[k].value = data[k]; });
+                // Маркиране на екипа
+                if(data.Assignments) {
+                    const ids = data.Assignments.split(',');
+                    document.querySelectorAll('input[name="emp"]').forEach(cb => { if(ids.includes(cb.value)) cb.checked = true; });
+                }
             } else {
                 document.getElementById('form-id').value = '';
-                document.getElementById('modal-title').innerText = "Нова поръчка";
-                delBtn.classList.add('hidden');
+                document.getElementById('order-date').value = document.getElementById('date-picker').value;
+                document.getElementById('del-btn').classList.add('hidden');
             }
             document.getElementById('orderModal').classList.add('active');
         }
@@ -225,24 +230,32 @@
         async function handleSave(e) {
             e.preventDefault();
             toggleLoader(true);
-            const data = Object.fromEntries(new FormData(e.target).entries());
-            if (!data.ID_Order) data.ID_Order = "ORD-" + Math.floor(Math.random() * 900000);
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Събиране на назначените служители
+            const assigned = Array.from(document.querySelectorAll('input[name="emp"]:checked')).map(cb => cb.value);
+            data.Assignments = assigned.join(',');
 
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_DATA', tab: 'Orders', data: data }) });
-            setTimeout(() => { closeModal(); loadDay(); }, 1500);
+            if(!data.ID_Order) data.ID_Order = 'ORD-' + Math.floor(Math.random()*900000);
+
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_DATA', tab: 'Orders', data: data }) });
+                setTimeout(() => { closeModal(); loadInitialData(); }, 1500);
+            } catch(e) { toggleLoader(false); }
         }
 
-        async function handleDelete() {
-            const id = document.getElementById('form-id').value;
-            if (!confirm("Сигурни ли сте, че искате да изтриете поръчката?")) return;
+        async function deleteOrder() {
+            if(!confirm("Изтриване?")) return;
             toggleLoader(true);
-            await fetch(`${API_URL}?action=DELETE_DATA&tab=Orders&id=${id}`, { method: 'POST' });
+            await fetch(`${API_URL}?action=DELETE_DATA&tab=Orders&id=${document.getElementById('form-id').value}`, { method: 'POST' });
             closeModal();
-            loadDay();
+            loadInitialData();
         }
 
         function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
         function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+        function loadData() { renderCalendar(); }
     </script>
 </body>
 </html>
