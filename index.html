@@ -12,30 +12,30 @@
         .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
         .modal.active { display: flex; }
-        #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
+        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-blue-600 font-bold animate-pulse text-xs uppercase tracking-widest">Синхронизиране...</p>
+    <div id="loader">
+        <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-blue-600 font-bold text-[10px] uppercase tracking-widest animate-pulse">Синхронизация...</p>
     </div>
 
     <!-- LOGIN -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-6 bg-slate-900">
         <form onsubmit="handleLogin(event)" class="bg-white p-12 rounded-[40px] w-full max-w-md shadow-2xl space-y-4">
-            <h1 class="text-3xl font-black text-slate-900 mb-6 italic italic tracking-tighter">MESTIM <span class="text-blue-600 font-normal">ERP</span></h1>
+            <h1 class="text-3xl font-black text-slate-900 mb-6 italic tracking-tighter">MESTIM <span class="text-blue-600 font-normal">ERP</span></h1>
             <input type="email" id="email" placeholder="Имейл" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
             <input type="password" id="pass" placeholder="Парола" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl">ВХОД</button>
+            <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-slate-800 transition-all uppercase">Вход</button>
         </form>
     </div>
 
     <!-- APP -->
     <div id="app-screen" class="hidden min-h-screen flex">
         <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col shadow-2xl">
-            <h1 class="text-white text-xl font-black mb-12 italic tracking-tighter">MESTIM <span class="text-blue-500">OFFICE</span></h1>
+            <h1 class="text-white text-xl font-black mb-12 italic tracking-tighter uppercase">Mestim <span class="text-blue-500">Office</span></h1>
             <nav class="space-y-3 flex-1">
                 <button onclick="changeTab('Clients', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👥 Клиенти</button>
                 <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👷 Екип</button>
@@ -46,8 +46,8 @@
 
         <main class="flex-1 p-12 overflow-y-auto">
             <header class="flex justify-between items-center mb-12">
-                <h2 id="section-title" class="text-5xl font-extrabold text-slate-800 tracking-tighter italic">Клиенти</h2>
-                <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all shadow-blue-100">+ ДОБАВИ НОВ</button>
+                <h2 id="section-title" class="text-5xl font-extrabold text-slate-900 tracking-tighter italic">Клиенти</h2>
+                <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">+ ДОБАВИ НОВ</button>
             </header>
 
             <div class="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
@@ -55,6 +55,7 @@
                     <thead id="table-head" class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest"></thead>
                     <tbody id="table-body" class="divide-y divide-slate-50"></tbody>
                 </table>
+                <div id="no-data" class="hidden py-32 text-center text-slate-300 italic font-medium">Няма данни за показване</div>
             </div>
         </main>
     </div>
@@ -67,15 +68,14 @@
                 <div id="form-fields" class="space-y-4"></div>
                 <div class="flex gap-4 pt-8">
                     <button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button>
-                    <button type="submit" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-lg shadow-blue-100">Запази</button>
+                    <button type="submit" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-lg">Запази</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // ВАЖНО: Постави новия си URL тук
-        const API_URL = 'https://script.google.com/macros/s/AKfycby0ut8n-DYV8tFUW3t7A0HeuJj3I-DTdqx3qXMG56FIdHa9AaJbCAEsqRc2gbGA7dJI4g/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwzopLoI-LciRUQdBSJ9B5Qfsh8CPuaKK8UnVv38ctIMJTQhsS5_pP-14-_27ADxeAPMQ/exec';
         let currentTab = 'Clients';
         let fullData = [];
 
@@ -103,25 +103,26 @@
             toggleLoader(true);
             const tbody = document.getElementById('table-body');
             const thead = document.getElementById('table-head');
+            const noData = document.getElementById('no-data');
             try {
                 const res = await fetch(`${API_URL}?action=GET_DATA&tab=${currentTab}`);
                 const result = await res.json();
                 fullData = result.data || [];
                 
                 if (result.success && fullData.length > 0) {
+                    noData.classList.add('hidden');
                     const keys = Object.keys(fullData[0]);
                     thead.innerHTML = `<tr>${keys.map(k => `<th class="p-6">${k.replace('_', ' ')}</th>`).join('')}<th class="p-6"></th></tr>`;
                     tbody.innerHTML = fullData.map((row, idx) => `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
-                            ${keys.map(k => `<td class="p-6 text-sm text-slate-600 font-medium">${row[k] || ''}</td>`).join('')}
+                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50 text-sm">
+                            ${keys.map(k => `<td class="p-6 text-slate-600 font-medium">${row[k] || ''}</td>`).join('')}
                             <td class="p-6 text-right space-x-3 text-lg">
                                 <button onclick="openModal(${idx})" class="text-blue-500 hover:scale-125 transition">✎</button>
                                 <button onclick="deleteRow('${row[keys[0]]}')" class="text-red-400 hover:scale-125 transition">✕</button>
                             </td>
                         </tr>`).join('');
                 } else { 
-                    thead.innerHTML = '';
-                    tbody.innerHTML = '<tr><td class="p-20 text-center italic text-slate-300 font-medium text-sm tracking-widest uppercase">Няма данни в тази секция</td></tr>'; 
+                    thead.innerHTML = ''; tbody.innerHTML = ''; noData.classList.remove('hidden'); 
                 }
             } finally { toggleLoader(false); }
         }
@@ -165,16 +166,16 @@
             
             container.innerHTML = config[currentTab].map(f => {
                 if (f.includes('ID')) return `<input type="hidden" name="${f}" value="${editData ? editData[f] : ''}">`;
-                if (f === 'Role') return `<label class="text-[10px] font-bold text-slate-400 ml-2 uppercase tracking-widest">Роля</label><select name="Role" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500"><option value="Employee" ${editData?.Role=='Employee'?'selected':''}>Employee</option><option value="Admin" ${editData?.Role=='Admin'?'selected':''}>Admin</option></select>`;
-                return `<input type="text" name="${f}" placeholder="${f}" value="${editData ? editData[f] : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">`;
+                if (f === 'Role') return `<label class="text-[9px] font-bold text-slate-400 ml-2 uppercase">Роля</label><select name="Role" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500"><option value="Employee" ${editData?.Role=='Employee'?'selected':''}>Employee</option><option value="Admin" ${editData?.Role=='Admin'?'selected':''}>Admin</option></select>`;
+                return `<input type="text" name="${f}" placeholder="${f.replace('_',' ')}" value="${editData ? editData[f] : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">`;
             }).join('');
             
-            document.getElementById('modal-title').innerText = editData ? "Редактирай" : "Нов Запис";
+            document.getElementById('modal-title').innerText = editData ? "Редактирай" : "Добави Нов";
             document.getElementById('entryModal').classList.add('active');
         }
 
         function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-        function toggleLoader(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+        function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     </script>
 </body>
 </html>
