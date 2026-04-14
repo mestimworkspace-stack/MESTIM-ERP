@@ -131,20 +131,43 @@
         e.preventDefault();
         const email = document.getElementById('email').value;
         const pass = document.getElementById('pass').value;
-            if(!email || !pass) return;
-            toggleLoader(true);
-            try {
-                const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
-        const result = await res.json();
         
-        if (result.success) {
-            sessionStorage.setItem('isAuth', 'true');
-            location.reload(); 
-        } else {
-            alert("Грешка: " + result.error);
+        if(!email || !pass) return;
+        
+        // Показваме зареждане
+        if (typeof toggleLoader === "function") toggleLoader(true);
+        
+        try {
+            // ИЗПОЛЗВАМЕ GET ЗАЯВКА - ТОВА Е КЛЮЧЪТ КЪМ СТАБИЛНОСТТА
+            const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
+            const result = await res.json();
+            
+            if (result.success) {
+                // Запазваме сесията и името на потребителя
+                sessionStorage.setItem('isAuth', 'true');
+                sessionStorage.setItem('userName', result.user.name);
+                location.reload(); // Презареждаме, за да се скрие логин екрана и да се зареди календара
+            } else {
+                alert("Грешка: " + result.error);
+                if (typeof toggleLoader === "function") toggleLoader(false);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Критична грешка при връзка със сървъра. Проверете интернет връзката си.");
+            if (typeof toggleLoader === "function") toggleLoader(false);
         }
     }
 
+    // Проверка при зареждане на страницата
+    window.onload = () => {
+        if (sessionStorage.getItem('isAuth') === 'true') {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            // Тук стартираме календара и другите функции
+            if (typeof loadInitialInfo === "function") loadInitialInfo();
+        }
+    };
+        
         function logout() { location.reload(); }
 
         function renderAll() {
