@@ -2,161 +2,145 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MESTIM ERP - OFFICE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-        h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
-        .sidebar-btn.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
         .modal.active { display: flex; }
-        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
     </style>
 </head>
 <body>
-
-    <div id="loader">
-        <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-blue-600 font-bold text-[10px] uppercase tracking-widest animate-pulse">Синхронизация...</p>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6 bg-slate-900">
-        <form onsubmit="handleLogin(event)" class="bg-white p-12 rounded-[40px] w-full max-w-md shadow-2xl space-y-4">
-            <h1 class="text-3xl font-black text-slate-900 mb-6 italic tracking-tighter">MESTIM <span class="text-blue-600 font-normal">ERP</span></h1>
-            <input type="email" id="email" placeholder="Имейл" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <input type="password" id="pass" placeholder="Парола" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-slate-800 transition-all uppercase">Вход</button>
-        </form>
-    </div>
-
-    <!-- APP -->
-    <div id="app-screen" class="hidden min-h-screen flex">
-        <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col shadow-2xl">
-            <h1 class="text-white text-xl font-black mb-12 italic tracking-tighter uppercase">Mestim <span class="text-blue-500">Office</span></h1>
-           <nav class="space-y-3 flex-1">
-    <button onclick="changeTab('Clients', this)" class="sidebar-btn active w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👥 Клиенти</button>
-    <button onclick="changeTab('Employees', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">👷 Екип</button>
-    <button onclick="changeTab('Resources', this)" class="sidebar-btn w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold transition-all">📚 Ресурси</button>
-    
-    <!-- НОВ БУТОН КЪМ ОПЕРАЦИИ -->
-    <a href="operations.html" class="block w-full text-left p-4 rounded-2xl flex items-center gap-3 font-bold text-slate-400 hover:bg-slate-800 transition-all">
-        🗓️ График (Operations)
-    </a>
-</nav>
-            <button onclick="logout()" class="text-xs font-bold text-red-400 hover:text-white uppercase tracking-widest pt-6 border-t border-slate-800">Изход</button>
+    <div id="app-screen" class="flex min-h-screen">
+        <aside class="w-64 bg-slate-900 text-white p-6 shrink-0 shadow-2xl">
+            <h1 class="text-xl font-black mb-10 italic">MESTIM <span class="text-blue-500">OFFICE</span></h1>
+            <nav class="space-y-2">
+                <button onclick="changeTab('Clients', this)" class="w-full text-left p-4 rounded-xl font-bold bg-blue-600">👥 Клиенти</button>
+                <button onclick="changeTab('Employees', this)" class="w-full text-left p-4 rounded-xl font-bold hover:bg-slate-800">👷 Екип</button>
+                <button onclick="changeTab('Resources', this)" class="w-full text-left p-4 rounded-xl font-bold hover:bg-slate-800">📚 Ресурси</button>
+            </nav>
+            <div class="mt-10 pt-10 border-t border-slate-800">
+                <button onclick="location.href='operations.html'" class="w-full p-4 rounded-xl bg-orange-600 font-bold text-xs uppercase">🚀 График (Ops)</button>
+            </div>
         </aside>
 
-        <main class="flex-1 p-12 overflow-y-auto">
-            <header class="flex justify-between items-center mb-12">
-                <h2 id="section-title" class="text-5xl font-extrabold text-slate-900 tracking-tighter italic">Клиенти</h2>
-                <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">+ ДОБАВИ НОВ</button>
+        <main class="flex-1 p-10 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <h2 id="section-title" class="text-4xl font-extrabold text-slate-900 tracking-tighter italic">Клиенти</h2>
+                <div class="flex gap-4">
+                    <input type="text" id="search-input" oninput="filterTable()" placeholder="Търси име или телефон..." class="p-4 rounded-2xl border-none shadow-sm w-64 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="openModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg">+ ДОБАВИ</button>
+                </div>
             </header>
 
-            <div class="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
                 <table class="w-full text-left border-collapse">
                     <thead id="table-head" class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest"></thead>
                     <tbody id="table-body" class="divide-y divide-slate-50"></tbody>
                 </table>
-                <div id="no-data" class="hidden py-32 text-center text-slate-300 italic font-medium">Няма данни за показване</div>
+            </div>
+
+            <!-- ИСТОРИЯ НА ПОРЪЧКИТЕ -->
+            <div id="history-section" class="mt-10 hidden">
+                <h3 class="text-xl font-black text-slate-800 mb-4 italic">История на поръчките за: <span id="client-name-history" class="text-blue-600"></span></h3>
+                <div id="history-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </main>
     </div>
 
     <!-- MODAL -->
-    <div id="entryModal" class="modal">
-        <div class="bg-white rounded-[40px] w-full max-w-lg p-10 shadow-2xl">
-            <h3 id="modal-title" class="text-2xl font-bold mb-8 text-slate-900">Запис</h3>
-            <form id="dataForm" onsubmit="handleSave(event)" class="space-y-4">
-                <div id="form-fields" class="space-y-4"></div>
-                <div class="flex gap-4 pt-8">
-                    <button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button>
-                    <button type="submit" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-lg">Запази</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div id="entryModal" class="modal"><div class="bg-white rounded-[40px] w-full max-w-lg p-10 shadow-2xl">
+        <h3 id="modal-title" class="text-2xl font-bold mb-8">Запис</h3>
+        <form id="dataForm" onsubmit="handleSave(event)" class="space-y-4">
+            <div id="form-fields" class="space-y-4"></div>
+            <div class="flex gap-4 pt-6"><button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold">Отказ</button><button type="submit" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold">ЗАПАЗИ</button></div>
+        </form>
+    </div></div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwzopLoI-LciRUQdBSJ9B5Qfsh8CPuaKK8UnVv38ctIMJTQhsS5_pP-14-_27ADxeAPMQ/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyTU8W-EU1K_zxiSMHBYYf8K7OlRfNk7FGt_Tnj0fD5Sge3wthy_v-XRCkaAlPkc45WTw/exec';
         let currentTab = 'Clients';
         let fullData = [];
+        let allOrders = [];
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            toggleLoader(true);
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'LOGIN', email: document.getElementById('email').value, password: document.getElementById('pass').value })
-                });
-                const result = await res.json();
-                if (result.success) {
-                    sessionStorage.setItem('isAuth', 'true');
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('app-screen').classList.remove('hidden');
-                    loadData();
-                } else { alert("Грешен имейл или парола!"); }
-            } finally { toggleLoader(false); }
-        }
-
-        function logout() { sessionStorage.clear(); location.reload(); }
+        window.onload = () => { loadData(); loadOrders(); };
 
         async function loadData() {
-            toggleLoader(true);
+            const res = await fetch(`${API_URL}?action=GET_DATA&tab=${currentTab}`);
+            const result = await res.json();
+            fullData = result.data || [];
+            renderTable(fullData);
+        }
+
+        async function loadOrders() {
+            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`);
+            const result = await res.json();
+            allOrders = result.data || [];
+        }
+
+        function renderTable(data) {
             const tbody = document.getElementById('table-body');
             const thead = document.getElementById('table-head');
-            const noData = document.getElementById('no-data');
-            try {
-                const res = await fetch(`${API_URL}?action=GET_DATA&tab=${currentTab}`);
-                const result = await res.json();
-                fullData = result.data || [];
-                
-                if (result.success && fullData.length > 0) {
-                    noData.classList.add('hidden');
-                    const keys = Object.keys(fullData[0]);
-                    thead.innerHTML = `<tr>${keys.map(k => `<th class="p-6">${k.replace('_', ' ')}</th>`).join('')}<th class="p-6"></th></tr>`;
-                    tbody.innerHTML = fullData.map((row, idx) => `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50 text-sm">
-                            ${keys.map(k => `<td class="p-6 text-slate-600 font-medium">${row[k] || ''}</td>`).join('')}
-                            <td class="p-6 text-right space-x-3 text-lg">
-                                <button onclick="openModal(${idx})" class="text-blue-500 hover:scale-125 transition">✎</button>
-                                <button onclick="deleteRow('${row[keys[0]]}')" class="text-red-400 hover:scale-125 transition">✕</button>
-                            </td>
-                        </tr>`).join('');
-                } else { 
-                    thead.innerHTML = ''; tbody.innerHTML = ''; noData.classList.remove('hidden'); 
-                }
-            } finally { toggleLoader(false); }
+            if(data.length > 0) {
+                const keys = Object.keys(data[0]);
+                thead.innerHTML = `<tr>${keys.map(k => `<th class="p-6">${k}</th>`).join('')}<th class="p-6"></th></tr>`;
+                tbody.innerHTML = data.map((row, idx) => `
+                    <tr onclick="showHistory('${row.Name}')" class="hover:bg-blue-50 cursor-pointer transition-colors border-b border-slate-50">
+                        ${keys.map(k => `<td class="p-6 text-sm text-slate-600 font-medium">${row[k] || ''}</td>`).join('')}
+                        <td class="p-6 text-right space-x-2">
+                            <button onclick="event.stopPropagation(); openModal(${idx})" class="text-blue-500">✎</button>
+                            <button onclick="event.stopPropagation(); deleteRow('${row[keys[0]]}')" class="text-red-400">✕</button>
+                        </td>
+                    </tr>`).join('');
+            }
+        }
+
+        function filterTable() {
+            const val = document.getElementById('search-input').value.toLowerCase();
+            const filtered = fullData.filter(r => 
+                (r.Name && r.Name.toLowerCase().includes(val)) || 
+                (r.Phone && r.Phone.toString().includes(val))
+            );
+            renderTable(filtered);
+        }
+
+        function showHistory(clientName) {
+            document.getElementById('history-section').classList.remove('hidden');
+            document.getElementById('client-name-history').innerText = clientName;
+            const history = allOrders.filter(o => o.ClientName === clientName);
+            const container = document.getElementById('history-container');
+            if(history.length === 0) container.innerHTML = '<p class="text-slate-400 italic">Няма намерени поръчки.</p>';
+            else container.innerHTML = history.map(o => `
+                <div class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-blue-500 uppercase">${o.Date.split('T')[0]} | ${o.TimeStart}</p>
+                    <p class="font-bold text-slate-800">${o.Service}</p>
+                    <p class="text-xs text-slate-500 mt-2 italic">${o.AddrStart || 'Няма адрес'}</p>
+                </div>
+            `).join('');
         }
 
         async function handleSave(e) {
             e.preventDefault();
-            toggleLoader(true);
             const data = Object.fromEntries(new FormData(e.target).entries());
             const idKey = currentTab === 'Clients' ? 'ID_Client' : (currentTab === 'Employees' ? 'ID_Emp' : 'ID_Resource');
-            if (!data[idKey]) data[idKey] = "ID-" + Math.floor(Math.random() * 900000);
-            
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_DATA', tab: currentTab, data: data }) });
-                setTimeout(() => { closeModal(); loadData(); }, 1500);
-            } catch(e) { toggleLoader(false); }
+            if (!data[idKey]) data[idKey] = "ID-" + Date.now();
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'SAVE_DATA', tab: currentTab, data: data }) });
+            setTimeout(() => { closeModal(); loadData(); }, 1000);
         }
 
         async function deleteRow(id) {
-            if (!confirm("Изтриване?")) return;
-            toggleLoader(true);
+            if(!confirm("Изтриване?")) return;
             await fetch(`${API_URL}?action=DELETE_DATA&tab=${currentTab}&id=${id}`, { method: 'POST' });
             loadData();
         }
 
         function changeTab(tab, btn) {
             currentTab = tab;
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('section-title').innerText = btn.innerText.split(' ')[1];
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('bg-blue-600'));
+            btn.classList.add('bg-blue-600');
+            document.getElementById('section-title').innerText = tab;
+            document.getElementById('history-section').classList.add('hidden');
             loadData();
         }
 
@@ -168,19 +152,14 @@
                 'Employees': ['ID_Emp', 'Name', 'Email', 'Password', 'Role'],
                 'Resources': ['ID_Resource', 'Title', 'Link', 'Notes']
             };
-            
             container.innerHTML = config[currentTab].map(f => {
                 if (f.includes('ID')) return `<input type="hidden" name="${f}" value="${editData ? editData[f] : ''}">`;
-                if (f === 'Role') return `<label class="text-[9px] font-bold text-slate-400 ml-2 uppercase">Роля</label><select name="Role" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500"><option value="Employee" ${editData?.Role=='Employee'?'selected':''}>Employee</option><option value="Admin" ${editData?.Role=='Admin'?'selected':''}>Admin</option></select>`;
-                return `<input type="text" name="${f}" placeholder="${f.replace('_',' ')}" value="${editData ? editData[f] : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">`;
+                return `<input type="text" name="${f}" placeholder="${f}" value="${editData ? editData[f] : ''}" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">`;
             }).join('');
-            
-            document.getElementById('modal-title').innerText = editData ? "Редактирай" : "Добави Нов";
             document.getElementById('entryModal').classList.add('active');
         }
 
         function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-        function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     </script>
 </body>
 </html>
