@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MESTIM ERP - TEAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .order-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 6px solid #2563eb; }
+    </style>
+</head>
+<body class="p-4 pb-20">
+
+    <!-- LOGIN -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center">
+        <form onsubmit="handleLogin(event)" class="w-full max-w-sm space-y-4">
+            <h1 class="text-3xl font-bold text-center mb-8">МЕСТИМ <span class="text-blue-600">TEAM</span></h1>
+            <input type="email" id="email" placeholder="Имейл" required class="w-full p-4 rounded-2xl border-none shadow-sm">
+            <input type="password" id="pass" placeholder="Парола" required class="w-full p-4 rounded-2xl border-none shadow-sm">
+            <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold">ВХОД</button>
+        </form>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-screen" class="hidden space-y-6">
+        <header class="flex justify-between items-center py-4">
+            <div>
+                <p class="text-xs text-slate-400 font-bold uppercase">Служител</p>
+                <h2 id="user-name" class="text-xl font-bold">Зареждане...</h2>
+            </div>
+            <button onclick="sessionStorage.clear(); location.reload();" class="text-xs font-bold text-red-500">ИЗХОД</button>
+        </header>
+
+        <h3 class="font-bold text-slate-800">Днешни задачи</h3>
+        <div id="my-orders" class="space-y-4">
+            <!-- Тук ще се заредят поръчките -->
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'ВАШИЯТ_API_URL_ТУК';
+        let currentUser = null;
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(document.getElementById('email').value)}&pass=${encodeURIComponent(document.getElementById('pass').value)}`);
+            const result = await res.json();
+            if (result.success) {
+                sessionStorage.setItem('team_auth', 'true');
+                sessionStorage.setItem('user', JSON.stringify(result.user));
+                location.reload();
+            } else { alert("Грешен вход!"); }
+        }
+
+        window.onload = () => {
+            if (sessionStorage.getItem('team_auth') === 'true') {
+                currentUser = JSON.parse(sessionStorage.getItem('user'));
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-name').innerText = currentUser.name;
+                loadMyOrders();
+            }
+        };
+
+        async function loadMyOrders() {
+            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`);
+            const result = await res.json();
+            const myOrders = (result.data || []).filter(o => 
+                o.Assignments && o.Assignments.includes(currentUser.id)
+            );
+
+            const container = document.getElementById('my-orders');
+            if(myOrders.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-10 italic">Няма назначени задачи за вас.</p>';
+                return;
+            }
+
+            container.innerHTML = myOrders.map(o => `
+                <div class="order-card space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-[10px] font-bold text-blue-600 uppercase">${o.TimeStart} - ${o.TimeEnd}</span>
+                        <span class="text-[10px] font-bold text-slate-300">#${o.ID_Order.slice(-4)}</span>
+                    </div>
+                    <h4 class="font-bold text-lg">${o.ClientName}</h4>
+                    <p class="text-sm text-slate-500 font-medium">${o.AddrStart}</p>
+                    <div class="flex gap-2 pt-2">
+                        <a href="tel:${o.Phone}" class="flex-1 bg-slate-100 p-3 rounded-xl text-center font-bold text-sm">📞 Обади се</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.AddrStart)}" class="flex-1 bg-slate-100 p-3 rounded-xl text-center font-bold text-sm">📍 Карта</a>
+                    </div>
+                    <button onclick="clockIn('${o.ID_Order}')" class="w-full bg-green-500 text-white p-4 rounded-xl font-bold mt-2 shadow-lg shadow-green-200">ЗАПОЧНИ РАБОТА</button>
+                </div>
+            `).join('');
+        }
+
+        async function clockIn(orderId) {
+            if(!confirm("Започвате ли работа по тази поръчка?")) return;
+            alert("Записано! (В следващата стъпка ще свържем WorkLogs)");
+        }
+    </script>
+</body>
+</html>
