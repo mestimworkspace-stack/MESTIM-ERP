@@ -127,23 +127,23 @@
         const SERVICE_COLORS = { "Преместване": "#2ecc71", "Работа на екип": "#3498db", "Изхвърляне строителни": "#e67e22", "Изхвърляне мебели": "#95a5a6", "Транспорт": "#1abc9c", "Оглед": "#f1c40f", "Монтаж": "#e74c3c" };
         let appData = {}; let calendar;
 
-        async function tryLogin() {
-            const email = document.getElementById('logEmail').value.trim();
-            const pass = document.getElementById('logPass').value.trim();
+        async function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
             if(!email || !pass) return;
             toggleLoader(true);
             try {
-                const resp = await fetch(`${API_URL}?email=${email}&pass=${pass}`);
-                const data = await resp.json();
-                if(data.error) throw new Error(data.error);
-                appData = data;
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                renderAll();
-                setTimeout(() => { if(calendar) { calendar.render(); calendar.updateSize(); } }, 300);
-            } catch(e) { document.getElementById('loginError').innerText = "Грешен имейл или парола!"; }
-            toggleLoader(false);
+                const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
+        const result = await res.json();
+        
+        if (result.success) {
+            sessionStorage.setItem('isAuth', 'true');
+            location.reload(); 
+        } else {
+            alert("Грешка: " + result.error);
         }
+    }
 
         function logout() { location.reload(); }
 
