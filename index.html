@@ -88,25 +88,28 @@
         let fullData = [];
 
         // --- AUTH ---
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            toggleLoader(true);
-            try {
-                // Използваме стабилния GET метод за логин
-                const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
-                const result = await res.json();
-                if (result.success) {
-                    sessionStorage.setItem('office_auth', 'true');
-                    location.reload(); 
-                } else { alert("Грешен имейл или парола!"); }
-            } catch (err) { alert("Грешка при връзка!"); }
-            finally { toggleLoader(false); }
-        }
+       async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
+    const result = await res.json();
+    if (result.success) {
+        localStorage.setItem('mestim_auth', 'true'); // Споделен ключ
+        localStorage.setItem('mestim_user', JSON.stringify(result.user));
+        location.reload();
+    } else { alert("Грешен вход!"); }
+}
 
-        function logout() { sessionStorage.clear(); location.reload(); }
+window.onload = () => {
+    if (localStorage.getItem('mestim_auth') === 'true') {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        loadData();
+    }
+};
 
+function logout() { localStorage.clear(); location.reload(); }
         // --- DATA ---
         window.onload = () => {
             if (sessionStorage.getItem('office_auth') === 'true') {
