@@ -114,14 +114,17 @@
         function logout() { sessionStorage.clear(); location.reload(); }
 
         // --- CALENDAR & DATA ---
-        window.onload = () => {
-            if (sessionStorage.getItem('isAuth') === 'true') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                initCalendar();
-                loadInitialData();
-            }
-        };
+       window.onload = () => {
+    // Автоматичен вход, ако си влязъл в Office
+    if (localStorage.getItem('mestim_auth') !== 'true') {
+        alert("Моля, влезте първо през Office панела!");
+        location.href = 'index.html';
+        return;
+    }
+    document.getElementById('app-screen').classList.remove('hidden');
+    initCalendar();
+    loadInitialData();
+};
 
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
