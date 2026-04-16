@@ -156,14 +156,18 @@
             toggleLoader(true);
             const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r => r.json());
             const svcColors = { 'Преместване': '#3b82f6', 'Работа на екип': '#10b981', 'Изхвърляне строителни': '#f59e0b', 'Изхвърляне мебели': '#ef4444', 'Транспорт': '#8b5cf6', 'Оглед': '#06b6d4', 'Монтаж': '#ec4899' };
-            const events = (res.data || []).map(o => ({
-                id: o.ID_Order,
-                title: `${o.ClientName} (${o.Service})`,
-                start: `${o.Date.split('T')[0]}T${o.TimeStart}`,
-                end: `${o.Date.split('T')[0]}T${o.TimeEnd}`,
-                backgroundColor: svcColors[o.Service] || '#64748b',
-                extendedProps: { originalData: o }
-            }));
+            const events = (res.data || []).map(o => {
+    // Подсигуряваме датата
+    const dateStr = o.Date.includes('T') ? o.Date.split('T')[0] : o.Date;
+    return {
+        id: o.ID_Order,
+        title: `${o.ClientName} (${o.Service})`,
+        start: `${dateStr}T${o.TimeStart}`,
+        end: `${dateStr}T${o.TimeEnd}`,
+        backgroundColor: svcColors[o.Service] || '#64748b',
+        extendedProps: { originalData: o }
+    };
+});
             successCallback(events);
             toggleLoader(false);
         }
