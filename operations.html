@@ -33,27 +33,28 @@
     <!-- ORDER MODAL -->
     <div id="orderModal" class="modal">
         <div class="bg-white rounded-[40px] w-full max-w-4xl p-10 shadow-2xl flex gap-8">
-            <form id="orderForm" onsubmit="handleSave(event)" class="flex-1 space-y-4">
-                <input type="hidden" name="ID_Order" id="form-id">
-                <h3 id="modal-title" class="text-2xl font-black mb-4 uppercase italic">Поръчка</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2"><input name="ClientName" placeholder="Име на клиент" required autocomplete="off" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500"></div>
-                    <input type="text" name="Phone" placeholder="Телефон" required autocomplete="off" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <select name="Service" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold">
-                        <option>Преместване</option><option>Работа на екип</option><option>Изхвърляне строителни</option><option>Изхвърляне мебели</option><option>Транспорт</option><option>Оглед</option><option>Монтаж</option>
-                    </select>
-                    <input type="date" name="Date" required id="form-date" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="time" name="TimeStart" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                        <input type="time" name="TimeEnd" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                    </div>
-                    <input type="text" name="AddrStart" placeholder="Адрес" autocomplete="off" class="w-full p-4 bg-slate-50 rounded-2xl outline-none col-span-2">
-                </div>
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="closeModal()" class="flex-1 p-5 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button>
-                    <button type="submit" class="flex-1 p-5 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-xl">Запази</button>
-                </div>
-            </form>
+           <form id="orderForm" onsubmit="handleSave(event)" class="flex-1 space-y-4">
+    <input type="hidden" name="ID_Order" id="form-id">
+    <h3 class="text-3xl font-black text-slate-900 italic mb-6">Детайли</h3>
+    
+    <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-1">
+            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Клиент (Име)</label>
+            <input list="client-names" name="ClientName" id="client-name-input" oninput="syncClientData('name')" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
+            <datalist id="client-names"></datalist>
+        </div>
+        <div class="col-span-1">
+            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Телефон</label>
+            <input list="client-phones" name="Phone" id="client-phone-input" oninput="syncClientData('phone')" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
+            <datalist id="client-phones"></datalist>
+        </div>
+        <!-- Останалите полета ... -->
+        <div class="col-span-2">
+            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Описание / Детайли</label>
+            <textarea name="Description" placeholder="Какво ще се мести, етаж, асансьор..." class="w-full p-4 bg-slate-50 rounded-2xl outline-none h-24"></textarea>
+        </div>
+    </div>
+</form>
             <div class="w-64 border-l pl-8 space-y-4">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Екип</p>
                 <div id="employees-list" class="space-y-2 overflow-y-auto max-h-[400px]"></div>
@@ -141,6 +142,27 @@
         }
 
         function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
+        let allClients = [];
+
+async function loadInitialData() {
+    const cRes = await fetch(`${API_URL}?action=GET_DATA&tab=Clients`).then(r => r.json());
+    allClients = cRes.data || [];
+    document.getElementById('client-names').innerHTML = allClients.map(c => `<option value="${c.Name}">`).join('');
+    document.getElementById('client-phones').innerHTML = allClients.map(c => `<option value="${c.Phone}">`).join('');
+    // ... останалия код за служителите ...
+}
+
+function syncClientData(type) {
+    if (type === 'name') {
+        const val = document.getElementById('client-name-input').value;
+        const match = allClients.find(c => c.Name === val);
+        if (match) document.getElementById('client-phone-input').value = match.Phone;
+    } else {
+        const val = document.getElementById('client-phone-input').value;
+        const match = allClients.find(c => c.Phone.toString() === val);
+        if (match) document.getElementById('client-name-input').value = match.Name;
+    }
+}
     </script>
 </body>
 </html>
