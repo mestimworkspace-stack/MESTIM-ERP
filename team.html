@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MESTIM TEAM</title>
@@ -120,23 +121,31 @@
         }
 
         async function clockIn(orderId) {
-            if(!confirm("Започвате ли работа?")) return;
-            
-            const logData = {
-                ID_Log: "LOG-" + Date.now(),
-                Order_ID: orderId,
-                Emp_ID: user.id,
-                Emp_Name: user.name,
-                Clock_In: new Date().toLocaleTimeString('bg-BG', { hour: '2-digit', minute: '2-digit' }),
-                Status: 'Started'
-            };
+    if(!confirm("Започвате работа?")) return;
+    const logData = {
+        ID_Log: "LOG-" + Date.now(),
+        Order_ID: orderId,
+        Emp_ID: user.id,
+        Emp_Name: user.name,
+        Clock_In: new Date().toISOString(), // Пълен формат за изчисления
+        Status: 'Started'
+    };
+    await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_DATA', tab: 'WorkLogs', data: logData }) });
+    alert("Записано! Когато приключите, натиснете СТОП.");
+    location.reload();
+}
 
-            await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ action: 'SAVE_DATA', tab: 'WorkLogs', data: logData })
-            });
-            alert("Успешно започнахте работа! Данните са изпратени към Офиса.");
+async function clockOut(orderId) {
+    if(!confirm("Приключвате ли работа по тази поръчка?")) return;
+    const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'CLOCK_OUT', empId: user.id, orderId: orderId })
+    });
+    const result = await res.json();
+    if (result.success) {
+        alert(`Работата приключи!\nВреме: ${result.minutes} мин.\nЗаработена сума: ${result.pay} EUR`);
+        location.reload();
+    }
         }
     </script>
 </body>
