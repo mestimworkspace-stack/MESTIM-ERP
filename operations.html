@@ -2,52 +2,27 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MESTIM ERP - OPERATIONS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-        h1, h2 { font-family: 'Montserrat', sans-serif; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
         .modal.active { display: flex; }
         .fc { background: white; padding: 20px; border-radius: 32px; height: 85vh; border: none; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); }
-        #loader { display: none; position: fixed; inset: 0; background: white; z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-blue-600 font-bold uppercase text-[10px] tracking-widest animate-pulse">Синхронизиране...</p>
-    </div>
-
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6 bg-slate-900">
-        <form onsubmit="handleLogin(event)" class="bg-white p-12 rounded-[40px] w-full max-w-md shadow-2xl space-y-4">
-            <h1 class="text-3xl font-black text-slate-900 mb-6 italic tracking-tighter">MESTIM <span class="text-blue-600 font-normal">OPERATIONS</span></h1>
-            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Вход в графика</p>
-            <input type="email" id="email" placeholder="Имейл" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <input type="password" id="pass" placeholder="Парола" required class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-blue-700 transition-all uppercase shadow-lg shadow-blue-900/20">Вход</button>
-        </form>
-    </div>
-
-    <!-- MAIN APP -->
+    <!-- APP SCREEN -->
     <div id="app-screen" class="hidden min-h-screen flex">
         <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col">
-            <h1 class="text-white text-xl font-black mb-12 italic tracking-tighter uppercase leading-none">Mestim <span class="text-blue-500 block text-[10px] not-italic tracking-[0.3em] mt-1 font-bold">Ops Center</span></h1>
+            <h1 class="text-white text-xl font-black mb-12 italic uppercase tracking-tighter">Mestim <span class="text-blue-500 block text-[10px] mt-1 font-bold tracking-[0.3em]">Ops Center</span></h1>
             <div class="flex-1 space-y-4">
-                <button onclick="openModal()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-900/20 mb-6">+ НОВА ПОРЪЧКА</button>
-                <div class="p-5 bg-slate-800/50 rounded-2xl border border-slate-700 text-[11px] space-y-2">
-                    <p class="text-slate-500 font-bold uppercase tracking-widest mb-2">Легенда</p>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Преместване</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-sm"></span> Екип / Монтаж</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-red-500 rounded-sm"></span> Изхвърляне</div>
-                </div>
+                <button onclick="openModal()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-blue-700 shadow-xl mb-6 tracking-widest">+ НОВА ПОРЪЧКА</button>
             </div>
-            <button onclick="logout()" class="w-full p-4 rounded-xl border border-slate-700 text-xs font-bold text-red-400 hover:bg-slate-800 transition uppercase tracking-widest">Изход</button>
+            <button onclick="location.href='index.html'" class="w-full p-4 rounded-xl border border-slate-700 text-xs font-bold text-white hover:bg-slate-800 transition uppercase tracking-widest mb-4">⬅ Назад към Офис</button>
         </aside>
 
         <main class="flex-1 p-8 overflow-y-auto">
@@ -55,15 +30,15 @@
         </main>
     </div>
 
-    <!-- MODAL -->
+    <!-- ORDER MODAL -->
     <div id="orderModal" class="modal">
         <div class="bg-white rounded-[40px] w-full max-w-4xl p-10 shadow-2xl flex gap-8">
             <form id="orderForm" onsubmit="handleSave(event)" class="flex-1 space-y-4">
                 <input type="hidden" name="ID_Order" id="form-id">
-                <h3 id="modal-title" class="text-3xl font-black text-slate-900 italic tracking-tighter mb-4">Детайли</h3>
+                <h3 id="modal-title" class="text-2xl font-black mb-4 uppercase italic">Поръчка</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2"><input list="client-list" name="ClientName" id="client-input" placeholder="Име на клиент" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none"></div>
-                    <input type="text" name="Phone" placeholder="Телефон" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
+                    <div class="col-span-2"><input name="ClientName" placeholder="Име на клиент" required autocomplete="off" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500"></div>
+                    <input type="text" name="Phone" placeholder="Телефон" required autocomplete="off" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
                     <select name="Service" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold">
                         <option>Преместване</option><option>Работа на екип</option><option>Изхвърляне строителни</option><option>Изхвърляне мебели</option><option>Транспорт</option><option>Оглед</option><option>Монтаж</option>
                     </select>
@@ -72,123 +47,79 @@
                         <input type="time" name="TimeStart" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
                         <input type="time" name="TimeEnd" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
                     </div>
-                    <div class="col-span-2"><input type="text" name="AddrStart" placeholder="Адрес на обекта" class="w-full p-4 bg-slate-50 rounded-2xl outline-none"></div>
-                    <div class="col-span-2"><textarea name="Description" placeholder="Описание..." class="w-full p-4 bg-slate-50 rounded-2xl outline-none h-20"></textarea></div>
+                    <input type="text" name="AddrStart" placeholder="Адрес" autocomplete="off" class="w-full p-4 bg-slate-50 rounded-2xl outline-none col-span-2">
                 </div>
                 <div class="flex gap-4 pt-4">
                     <button type="button" onclick="closeModal()" class="flex-1 p-5 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button>
                     <button type="submit" class="flex-1 p-5 bg-blue-600 text-white rounded-2xl font-bold uppercase shadow-xl">Запази</button>
                 </div>
-                <button type="button" id="del-btn" onclick="deleteOrder()" class="w-full text-red-500 text-[10px] font-black uppercase mt-4 hidden text-center">Изтрий поръчката</button>
             </form>
-            <div class="w-64 border-l border-slate-100 pl-8">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Назначи Екип</p>
-                <div id="employees-list" class="space-y-2 overflow-y-auto max-h-[450px]"></div>
+            <div class="w-64 border-l pl-8 space-y-4">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Екип</p>
+                <div id="employees-list" class="space-y-2 overflow-y-auto max-h-[400px]"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // ПОСТАВИ ТВОЯ URL ТУК:
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzcyQt9yHa5BvQ_pkx84r-2ipgNwv4KAlaUchaXZkP6Jx0xmSZAMCqEAo24CUR4DPPS0w/exec';
-        
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwT8AhziY3Z1BxkrEeotyS3cbr5usToYS_E5R8LCrfHlnF_8b6hjWu0eQLpBpbe8qzJ-Q/exec';
         let calendar;
-        let orders = [], employees = [];
 
-        // --- AUTH ---
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            toggleLoader(true);
-            try {
-                const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
-                const result = await res.json();
-                if (result.success) {
-                    sessionStorage.setItem('isAuth', 'true');
-                    location.reload();
-                } else { alert("Грешен имейл или парола!"); toggleLoader(false); }
-            } catch (err) { alert("Грешка при връзка!"); toggleLoader(false); }
-        }
-
-        function logout() { sessionStorage.clear(); location.reload(); }
-
-        // --- CALENDAR & DATA ---
-       window.onload = () => {
-    // Автоматичен вход, ако си влязъл в Office
-    if (localStorage.getItem('mestim_auth') !== 'true') {
-        alert("Моля, влезте първо през Office панела!");
-        location.href = 'index.html';
-        return;
-    }
-    document.getElementById('app-screen').classList.remove('hidden');
-    initCalendar();
-    loadInitialData();
-};
+        window.onload = () => {
+            // ПРОВЕРКА ЗА АВТОМАТИЧЕН ВХОД ОТ OFFICE
+            if (localStorage.getItem('mestim_auth') !== 'true') {
+                alert("Моля, влезте в системата през главната страница!");
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('app-screen').classList.remove('hidden');
+            initCalendar();
+            loadEmployees();
+        };
 
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridDay',
                 locale: 'bg',
-                firstDay: 1,
-                slotMinTime: '07:00:00',
-                slotMaxTime: '21:00:00',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-                events: (fetchInfo, successCallback) => loadEvents(successCallback),
+                events: (info, success) => loadEvents(success),
                 eventClick: (info) => openModal(info.event.extendedProps.originalData)
             });
             calendar.render();
         }
 
-        async function loadInitialData() {
-            const eRes = await fetch(`${API_URL}?action=GET_DATA&tab=Employees`).then(r => r.json());
-            employees = eRes.data || [];
-            document.getElementById('employees-list').innerHTML = employees.map(e => `
-                <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-blue-50 transition border border-transparent">
+        async function loadEvents(success) {
+            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r => r.json());
+            const svcColors = { 'Преместване': '#3b82f6', 'Работа на екип': '#10b981', 'Изхвърляне строителни': '#f59e0b', 'Изхвърляне мебели': '#ef4444', 'Транспорт': '#8b5cf6', 'Оглед': '#06b6d4', 'Монтаж': '#ec4899' };
+            const events = (res.data || []).map(o => ({
+                id: o.ID_Order,
+                title: `${o.ClientName} (${o.Service})`,
+                start: `${o.Date.split('T')[0]}T${o.TimeStart}`,
+                end: `${o.Date.split('T')[0]}T${o.TimeEnd}`,
+                backgroundColor: svcColors[o.Service] || '#64748b',
+                extendedProps: { originalData: o }
+            }));
+            success(events);
+        }
+
+        async function loadEmployees() {
+            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Employees`).then(r => r.json());
+            document.getElementById('employees-list').innerHTML = (res.data || []).map(e => `
+                <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-blue-50 transition">
                     <input type="checkbox" name="emp" value="${e.ID_Emp}" class="w-5 h-5 rounded-lg text-blue-600">
                     <span class="text-xs font-bold text-slate-700">${e.Name}</span>
                 </label>
             `).join('');
         }
 
-        async function loadEvents(successCallback) {
-            toggleLoader(true);
-            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r => r.json());
-            const svcColors = { 'Преместване': '#3b82f6', 'Работа на екип': '#10b981', 'Изхвърляне строителни': '#f59e0b', 'Изхвърляне мебели': '#ef4444', 'Транспорт': '#8b5cf6', 'Оглед': '#06b6d4', 'Монтаж': '#ec4899' };
-            const events = (res.data || []).map(o => {
-    // Подсигуряваме датата
-    const dateStr = o.Date.includes('T') ? o.Date.split('T')[0] : o.Date;
-    return {
-        id: o.ID_Order,
-        title: `${o.ClientName} (${o.Service})`,
-        start: `${dateStr}T${o.TimeStart}`,
-        end: `${dateStr}T${o.TimeEnd}`,
-        backgroundColor: svcColors[o.Service] || '#64748b',
-        extendedProps: { originalData: o }
-    };
-});
-            successCallback(events);
-            toggleLoader(false);
-        }
-
         async function handleSave(e) {
             e.preventDefault();
-            toggleLoader(true);
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
+            const data = Object.fromEntries(new FormData(e.target).entries());
             data.Assignments = Array.from(document.querySelectorAll('input[name="emp"]:checked')).map(cb => cb.value).join(',');
             if(!data.ID_Order) data.ID_Order = 'ORD-' + Math.floor(Math.random()*900000);
-
             await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_DATA', tab: 'Orders', data: data }) });
-            setTimeout(() => { closeModal(); calendar.refetchEvents(); }, 1500);
-        }
-
-        async function deleteOrder() {
-            if(!confirm("Изтриване?")) return;
-            toggleLoader(true);
-            await fetch(`${API_URL}?action=DELETE_DATA&tab=Orders&id=${document.getElementById('form-id').value}`, { method: 'POST' });
-            closeModal(); calendar.refetchEvents();
+            setTimeout(() => { closeModal(); calendar.refetchEvents(); }, 1200);
         }
 
         function openModal(data = null) {
@@ -196,25 +127,20 @@
             form.reset();
             document.querySelectorAll('input[name="emp"]').forEach(cb => cb.checked = false);
             if(data) {
-                document.getElementById('modal-title').innerText = "Редакция";
                 document.getElementById('form-id').value = data.ID_Order;
-                document.getElementById('del-btn').classList.remove('hidden');
                 Object.keys(data).forEach(k => { if(form.elements[k]) form.elements[k].value = (k === 'Date' ? data[k].split('T')[0] : data[k]); });
                 if(data.Assignments) {
                     const ids = data.Assignments.split(',');
                     document.querySelectorAll('input[name="emp"]').forEach(cb => { if(ids.includes(cb.value)) cb.checked = true; });
                 }
             } else {
-                document.getElementById('modal-title').innerText = "Нова поръчка";
                 document.getElementById('form-id').value = '';
                 document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('del-btn').classList.add('hidden');
             }
             document.getElementById('orderModal').classList.add('active');
         }
 
         function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
-        function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     </script>
 </body>
 </html>
