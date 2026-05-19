@@ -2,167 +2,94 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <title>MESTIM ERP - OPERATIONS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <title>MESTIM OPERATIONS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
-        .modal.active { display: flex; }
-        .fc { background: white; padding: 20px; border-radius: 32px; height: 85vh; border: none; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
 </head>
-<body>
-
-    <!-- APP SCREEN -->
+<body class="bg-slate-100 font-sans">
     <div id="app-screen" class="hidden min-h-screen flex">
-        <aside class="w-72 bg-slate-900 text-slate-400 p-8 shrink-0 flex flex-col">
-            <h1 class="text-white text-xl font-black mb-12 italic uppercase tracking-tighter">Mestim <span class="text-blue-500 block text-[10px] mt-1 font-bold tracking-[0.3em]">Ops Center</span></h1>
-            <div class="flex-1 space-y-4">
-                <button onclick="openModal()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold hover:bg-blue-700 shadow-xl mb-6 tracking-widest">+ НОВА ПОРЪЧКА</button>
-            </div>
-            <button onclick="location.href='index.html'" class="w-full p-4 rounded-xl border border-slate-700 text-xs font-bold text-white hover:bg-slate-800 transition uppercase tracking-widest mb-4">⬅ Назад към Офис</button>
+        <aside class="w-72 bg-slate-900 text-white p-8 flex flex-col">
+            <h1 class="text-xl font-black italic uppercase mb-10">Mestim <span class="text-blue-500">Ops</span></h1>
+            <button onclick="openModal()" class="w-full bg-blue-600 p-5 rounded-2xl font-bold mb-6">+ НОВА ПОРЪЧКА</button>
+            <div class="flex-1"></div>
+            <button onclick="location.href='index.html'" class="p-4 border border-slate-700 rounded-xl text-xs font-bold uppercase">⬅ Назад в Офис</button>
         </aside>
-
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div id="calendar"></div>
-        </main>
+        <main class="flex-1 p-8"><div id="calendar" class="bg-white p-6 rounded-[32px] shadow-xl"></div></main>
     </div>
 
-    <!-- ORDER MODAL -->
-    <div id="orderModal" class="modal">
-        <div class="bg-white rounded-[40px] w-full max-w-4xl p-10 shadow-2xl flex gap-8">
-           <form id="orderForm" onsubmit="handleSave(event)" class="flex-1 space-y-4">
-    <input type="hidden" name="ID_Order" id="form-id">
-    <h3 class="text-3xl font-black text-slate-900 italic mb-6">Детайли</h3>
-    
-    <div class="grid grid-cols-2 gap-4">
-        <div class="col-span-1">
-            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Клиент (Име)</label>
-            <input list="client-names" name="ClientName" id="client-name-input" oninput="syncClientData('name')" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <datalist id="client-names"></datalist>
-        </div>
-        <div class="col-span-1">
-            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Телефон</label>
-            <input list="client-phones" name="Phone" id="client-phone-input" oninput="syncClientData('phone')" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500">
-            <datalist id="client-phones"></datalist>
-        </div>
-        <!-- Останалите полета ... -->
-        <div class="col-span-2">
-            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Описание / Детайли</label>
-            <textarea name="Description" placeholder="Какво ще се мести, етаж, асансьор..." class="w-full p-4 bg-slate-50 rounded-2xl outline-none h-24"></textarea>
-        </div>
-    </div>
-</form>
-            <div class="w-64 border-l pl-8 space-y-4">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Екип</p>
-                <div id="employees-list" class="space-y-2 overflow-y-auto max-h-[400px]"></div>
-            </div>
+    <!-- MODAL -->
+    <div id="o-modal" class="hidden fixed inset-0 bg-black/80 z-[1000] flex items-center justify-center">
+        <div class="bg-white p-10 rounded-[40px] w-full max-w-4xl shadow-2xl flex gap-8 text-sm">
+            <form onsubmit="handleSave(event)" id="o-form" class="flex-1 space-y-4">
+                <input type="hidden" name="ID_Order" id="o-id">
+                <h3 class="text-2xl font-black italic uppercase">Поръчка</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-1"><input list="c-names" name="ClientName" id="c-name" oninput="sync('name')" placeholder="Клиент" required class="w-full p-4 bg-slate-100 rounded-2xl outline-none"><datalist id="c-names"></datalist></div>
+                    <div class="col-span-1"><input list="c-phones" name="Phone" id="c-phone" oninput="sync('phone')" placeholder="Телефон" required class="w-full p-4 bg-slate-100 rounded-2xl outline-none"><datalist id="c-phones"></datalist></div>
+                    <select name="Service" class="w-full p-4 bg-slate-100 rounded-2xl font-bold"><option>Преместване</option><option>Работа на екип</option><option>Изхвърляне строителни</option><option>Изхвърляне мебели</option><option>Транспорт</option><option>Оглед</option><option>Монтаж</option></select>
+                    <input type="date" name="Date" id="o-date" required class="w-full p-4 bg-slate-100 rounded-2xl">
+                    <input type="time" name="TimeStart" required class="w-full p-4 bg-slate-100 rounded-2xl">
+                    <input type="time" name="TimeEnd" required class="w-full p-4 bg-slate-100 rounded-2xl">
+                    <input type="text" name="AddrStart" placeholder="Адрес" class="w-full p-4 bg-slate-100 rounded-2xl col-span-2">
+                    <textarea name="Description" placeholder="Описание..." class="w-full p-4 bg-slate-100 rounded-2xl col-span-2 h-20"></textarea>
+                </div>
+                <div class="flex gap-4 mt-4"><button type="button" onclick="closeModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold text-slate-400">Отказ</button><button type="submit" class="flex-1 p-4 bg-blue-600 text-white rounded-2xl font-bold uppercase">Запази</button></div>
+            </form>
+            <div class="w-64 border-l pl-8"><p class="font-bold uppercase text-[10px] mb-4">Назначи Екип</p><div id="e-list" class="space-y-2 max-h-[400px] overflow-y-auto"></div></div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwyk9p6Rocd7sK42etJeiFBzT4vHKA3pQPxKnUV4NSx-0h7LRPByLMyihWZOYOOYj_xUw/exec';
-        let calendar;
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz9qB0n9gT9YPEvny4por1EA1euuyFy23k2SMCv46VavPKs7CAwwnE-RuTM1cLpjzNbhA/exec';
+        let calendar, orders = [], employees = [], clients = [];
 
         window.onload = () => {
-            // ПРОВЕРКА ЗА АВТОМАТИЧЕН ВХОД ОТ OFFICE
-            if (localStorage.getItem('mestim_auth') !== 'true') {
-                alert("Моля, влезте в системата през главната страница!");
-                window.location.href = 'index.html';
-                return;
-            }
-            document.getElementById('app-screen').classList.remove('hidden');
-            initCalendar();
-            loadEmployees();
+            if (localStorage.getItem('mestim_auth') !== 'true') location.href = 'index.html';
+            else { document.getElementById('app-screen').classList.remove('hidden'); initCalendar(); loadAll(); }
         };
-
-        function initCalendar() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridDay',
-                locale: 'bg',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-                events: (info, success) => loadEvents(success),
-                eventClick: (info) => openModal(info.event.extendedProps.originalData)
+        async function loadAll() {
+            const [o, e, c] = await Promise.all([fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r=>r.json()), fetch(`${API_URL}?action=GET_DATA&tab=Employees`).then(r=>r.json()), fetch(`${API_URL}?action=GET_DATA&tab=Clients`).then(r=>r.json())]);
+            orders = o.data || []; employees = e.data || []; clients = c.data || [];
+            document.getElementById('c-names').innerHTML = clients.map(x=>`<option value="${x.Name}">`).join('');
+            document.getElementById('c-phones').innerHTML = clients.map(x=>`<option value="${x.Phone}">`).join('');
+            document.getElementById('e-list').innerHTML = employees.map(x=>`<label class="flex gap-2 p-2 bg-slate-50 rounded-lg"><input type="checkbox" name="emp" value="${x.ID_Emp}">${x.Name}</label>`).join('');
+            calendar.refetchEvents();
+        }
+        function initCalendar(){
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'timeGridDay', locale:'bg', headerToolbar: {left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek,timeGridDay'},
+                events: (info, success) => {
+                    const colors = {'Преместване':'#3b82f6','Работа на екип':'#10b981','Изхвърляне строителни':'#f59e0b','Изхвърляне мебели':'#ef4444'};
+                    success(orders.map(x=>({id:x.ID_Order, title:x.ClientName, start:`${x.Date}T${x.TimeStart}`, end:`${x.Date}T${x.TimeEnd}`, backgroundColor:colors[x.Service]||'#64748b', extendedProps:x})));
+                },
+                eventClick: (info) => openModal(info.event.extendedProps)
             });
             calendar.render();
         }
-
-        async function loadEvents(success) {
-            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r => r.json());
-            const svcColors = { 'Преместване': '#3b82f6', 'Работа на екип': '#10b981', 'Изхвърляне строителни': '#f59e0b', 'Изхвърляне мебели': '#ef4444', 'Транспорт': '#8b5cf6', 'Оглед': '#06b6d4', 'Монтаж': '#ec4899' };
-            const events = (res.data || []).map(o => ({
-                id: o.ID_Order,
-                title: `${o.ClientName} (${o.Service})`,
-                start: `${o.Date.split('T')[0]}T${o.TimeStart}`,
-                end: `${o.Date.split('T')[0]}T${o.TimeEnd}`,
-                backgroundColor: svcColors[o.Service] || '#64748b',
-                extendedProps: { originalData: o }
-            }));
-            success(events);
+        function sync(type){
+            if(type==='name'){ const m = clients.find(x=>x.Name === document.getElementById('c-name').value); if(m) document.getElementById('c-phone').value = m.Phone; }
+            else { const m = clients.find(x=>x.Phone.toString() === document.getElementById('c-phone').value); if(m) document.getElementById('c-name').value = m.Name; }
         }
-
-        async function loadEmployees() {
-            const res = await fetch(`${API_URL}?action=GET_DATA&tab=Employees`).then(r => r.json());
-            document.getElementById('employees-list').innerHTML = (res.data || []).map(e => `
-                <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-blue-50 transition">
-                    <input type="checkbox" name="emp" value="${e.ID_Emp}" class="w-5 h-5 rounded-lg text-blue-600">
-                    <span class="text-xs font-bold text-slate-700">${e.Name}</span>
-                </label>
-            `).join('');
-        }
-
-        async function handleSave(e) {
+        async function handleSave(e){
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target).entries());
-            data.Assignments = Array.from(document.querySelectorAll('input[name="emp"]:checked')).map(cb => cb.value).join(',');
-            if(!data.ID_Order) data.ID_Order = 'ORD-' + Math.floor(Math.random()*900000);
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_DATA', tab: 'Orders', data: data }) });
-            setTimeout(() => { closeModal(); calendar.refetchEvents(); }, 1200);
+            const d = Object.fromEntries(new FormData(e.target).entries());
+            d.Assignments = Array.from(document.querySelectorAll('input[name="emp"]:checked')).map(x=>x.value).join(',');
+            if(!d.ID_Order) d.ID_Order = "ORD-"+Date.now();
+            await fetch(API_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({action:'SAVE_DATA', tab:'Orders', data:d})});
+            closeModal(); setTimeout(loadAll, 1200);
         }
-
-        function openModal(data = null) {
-            const form = document.getElementById('orderForm');
-            form.reset();
-            document.querySelectorAll('input[name="emp"]').forEach(cb => cb.checked = false);
-            if(data) {
-                document.getElementById('form-id').value = data.ID_Order;
-                Object.keys(data).forEach(k => { if(form.elements[k]) form.elements[k].value = (k === 'Date' ? data[k].split('T')[0] : data[k]); });
-                if(data.Assignments) {
-                    const ids = data.Assignments.split(',');
-                    document.querySelectorAll('input[name="emp"]').forEach(cb => { if(ids.includes(cb.value)) cb.checked = true; });
-                }
-            } else {
-                document.getElementById('form-id').value = '';
-                document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
-            }
-            document.getElementById('orderModal').classList.add('active');
+        function openModal(d=null){
+            const f = document.getElementById('o-form'); f.reset();
+            document.querySelectorAll('input[name="emp"]').forEach(x=>x.checked = false);
+            if(d){
+                document.getElementById('o-id').value = d.ID_Order;
+                Object.keys(d).forEach(k=>{ if(f.elements[k]) f.elements[k].value = d[k]; });
+                if(d.Assignments) d.Assignments.split(',').forEach(id=>{ const cb = document.querySelector(`input[name="emp"][value="${id}"]`); if(cb) cb.checked=true; });
+            } else { document.getElementById('o-id').value = ''; document.getElementById('o-date').value = new Date().toISOString().split('T')[0]; }
+            document.getElementById('o-modal').classList.remove('hidden');
         }
-
-        function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
-        let allClients = [];
-
-async function loadInitialData() {
-    const cRes = await fetch(`${API_URL}?action=GET_DATA&tab=Clients`).then(r => r.json());
-    allClients = cRes.data || [];
-    document.getElementById('client-names').innerHTML = allClients.map(c => `<option value="${c.Name}">`).join('');
-    document.getElementById('client-phones').innerHTML = allClients.map(c => `<option value="${c.Phone}">`).join('');
-    // ... останалия код за служителите ...
-}
-
-function syncClientData(type) {
-    if (type === 'name') {
-        const val = document.getElementById('client-name-input').value;
-        const match = allClients.find(c => c.Name === val);
-        if (match) document.getElementById('client-phone-input').value = match.Phone;
-    } else {
-        const val = document.getElementById('client-phone-input').value;
-        const match = allClients.find(c => c.Phone.toString() === val);
-        if (match) document.getElementById('client-name-input').value = match.Name;
-    }
-}
+        function closeModal(){ document.getElementById('o-modal').classList.add('hidden'); }
     </script>
 </body>
 </html>
