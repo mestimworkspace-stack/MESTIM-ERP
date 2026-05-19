@@ -2,78 +2,74 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MESTIM TEAM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
 </head>
 <body class="bg-slate-100 p-4">
-    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6 bg-slate-900 fixed inset-0 z-50">
+    <div id="login-screen" class="min-h-screen fixed inset-0 z-50 flex items-center justify-center bg-slate-900 p-6">
         <form onsubmit="handleLogin(event)" class="bg-white p-10 rounded-[40px] w-full max-w-sm space-y-4">
-            <h1 class="text-2xl font-black italic uppercase">Mestim <span class="text-blue-600 font-normal">Team</span></h1>
-            <input type="email" id="email" placeholder="Имейл" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold">
-            <input type="password" id="pass" placeholder="Парола" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold">
+            <h1 class="text-2xl font-black italic uppercase text-center">Mestim <span class="text-blue-600 font-normal">Team</span></h1>
+            <input type="email" id="email" placeholder="Имейл" required class="p-4 bg-slate-100 rounded-2xl w-full">
+            <input type="password" id="pass" placeholder="Парола" required class="p-4 bg-slate-100 rounded-2xl w-full">
             <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold uppercase">Вход</button>
         </form>
     </div>
 
     <div id="app-screen" class="hidden space-y-6 pt-4">
         <header class="flex justify-between items-center bg-white p-6 rounded-[32px] shadow-sm">
-            <div><p class="text-[10px] font-bold text-blue-600 uppercase">Служител</p><h2 id="user-name" class="text-xl font-black italic uppercase"></h2></div>
+            <div><p class="text-[10px] font-bold text-blue-600 uppercase">Служител</p><h2 id="uname" class="text-xl font-black italic uppercase"></h2></div>
             <button onclick="localStorage.clear(); location.reload();" class="text-red-500 font-bold uppercase text-[10px]">Изход</button>
         </header>
-        <div id="my-orders" class="space-y-4"></div>
+        <div id="tasks" class="space-y-4 pb-20"></div>
     </div>
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbyQelM5bDNtGj1NBIBhgoBzeKr0FTPaXLp52II59H_c8eBWJ6HBCTAgk2sOAqgeCBsdUg/exec';
-        let user = null, workLogs = [];
+        let user = null;
 
-        window.onload = async () => {
-            if (localStorage.getItem('mestim_auth') === 'true') {
-                user = JSON.parse(localStorage.getItem('mestim_user'));
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('user-name').innerText = user.name;
-                loadTasks();
-            }
-        };
+        window.onload = () => { if (localStorage.getItem('mestim_auth')) showTasks(); };
         async function handleLogin(e){
             e.preventDefault();
             const res = await fetch(`${API_URL}?action=LOGIN&email=${encodeURIComponent(document.getElementById('email').value)}&pass=${encodeURIComponent(document.getElementById('pass').value)}`).then(r=>r.json());
-            if(res.success){ localStorage.setItem('mestim_auth','true'); localStorage.setItem('mestim_user', JSON.stringify(res.user)); location.reload(); }
+            if(res.success){ localStorage.setItem('mestim_auth','true'); localStorage.setItem('mestim_user', JSON.stringify(res.user)); showTasks(); }
             else alert("Грешен вход!");
+        }
+        function showTasks(){ 
+            user = JSON.parse(localStorage.getItem('mestim_user'));
+            document.getElementById('login-screen').classList.add('hidden'); 
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('uname').innerText = user.name;
+            loadTasks();
         }
         async function loadTasks() {
             const [o, w] = await Promise.all([fetch(`${API_URL}?action=GET_DATA&tab=Orders`).then(r=>r.json()), fetch(`${API_URL}?action=GET_DATA&tab=WorkLogs`).then(r=>r.json())]);
-            const myTasks = (o.data||[]).filter(x => x.Assignments && x.Assignments.split(',').includes(user.id.toString()));
-            workLogs = w.data || [];
-            
-            document.getElementById('my-orders').innerHTML = myTasks.map(t => {
-                const active = workLogs.find(l => l.Order_ID === t.ID_Order && l.Emp_ID.toString() === user.id.toString() && l.Status === 'Started');
+            const myT = (o.data||[]).filter(x => x.Assignments && x.Assignments.split(',').includes(user.id.toString()));
+            document.getElementById('tasks').innerHTML = myT.map(t => {
+                const active = (w.data||[]).find(l => l.Order_ID === t.ID_Order && l.Emp_ID.toString() === user.id.toString() && l.Status === 'Started');
                 return `
                 <div class="bg-white p-6 rounded-[32px] shadow-sm border-l-[10px] ${active?'border-green-500':'border-blue-600'} space-y-3">
                     <div class="flex justify-between text-[10px] font-black opacity-40 uppercase"><span>${t.TimeStart} - ${t.TimeEnd}</span><span>#${t.ID_Order.slice(-4)}</span></div>
                     <h4 class="text-xl font-black italic uppercase">${t.ClientName}</h4>
                     <p class="text-xs font-bold text-slate-500 italic">${t.AddrStart || 'Няма адрес'}</p>
-                    <div class="bg-slate-50 p-4 rounded-2xl text-[11px] font-medium text-slate-600">${t.Description || 'Без описание'}</div>
+                    <div class="bg-slate-50 p-4 rounded-2xl text-[11px] font-medium text-slate-600">${t.Description || 'Няма описание'}</div>
+                    <div class="flex gap-2"><a href="tel:${t.Phone}" class="flex-1 p-3 bg-slate-900 text-white rounded-xl text-center text-xs font-bold uppercase">📞 Позвъни</a><a href="https://maps.google.com/?q=${encodeURIComponent(t.AddrStart)}" target="_blank" class="flex-1 p-3 bg-slate-200 text-slate-700 rounded-xl text-center text-xs font-bold uppercase">📍 Навигация</a></div>
                     ${active 
                         ? `<button onclick="clockOut('${t.ID_Order}')" class="w-full bg-red-500 text-white p-5 rounded-2xl font-black uppercase shadow-lg shadow-red-200">СТОП (Край на работа)</button>`
-                        : `<button onclick="clockIn('${t.ID_Order}')" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg shadow-blue-200">СТАРТ (Започни)</button>`
+                        : `<button onclick="clockIn('${t.ID_Order}')" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg shadow-green-200">СТАРТ (Започни)</button>`
                     }
                 </div>`;
-            }).join('');
+            }).join('') || '<p class="text-center p-10 text-slate-400 italic">Нямате задачи за днес.</p>';
         }
         async function clockIn(id){
-            if(!confirm("Започвате работа?")) return;
             const d = {ID_Log: "L-"+Date.now(), Order_ID: id, Emp_ID: user.id, Emp_Name: user.name, Clock_In: new Date().toISOString(), Status: 'Started'};
             await fetch(API_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({action:'SAVE_DATA', tab:'WorkLogs', data:d})});
             setTimeout(loadTasks, 1000);
         }
         async function clockOut(id){
-            if(!confirm("Приключвате?")) return;
             const res = await fetch(API_URL, {method:'POST', body:JSON.stringify({action:'CLOCK_OUT', empId:user.id, orderId:id})}).then(r=>r.json());
-            if(res.success){ alert(`Готово!\nВреме: ${res.min} мин.\nЗаработка: ${res.pay} EUR`); loadTasks(); }
+            if(res.success){ alert(`Готово!\nЗаработка: ${res.pay} EUR`); loadTasks(); }
         }
     </script>
 </body>
